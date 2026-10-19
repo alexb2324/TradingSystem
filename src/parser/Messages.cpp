@@ -13,9 +13,9 @@ void printSystemEventMessage(const SystemEventMessage& msg)
 {
     const json j = {
         {"System Event Message", {
-            {"Stock Locate", msg.stockLocate},
-            {"Tracking Number", msg.trackingNumber},
-            {"Timestamp", msg.timestamp},
+            {"Stock Locate", msg.header.stockLocate},
+            {"Tracking Number", msg.header.trackingNumber},
+            {"Timestamp", msg.header.timestamp},
             {"Event Code", std::string(1, msg.eventCode)}
         }}
     };
@@ -31,9 +31,9 @@ void printStockDirectoryMessage(const StockDirectoryMessage& msg)
 {
     json j = {
         {"Stock Directory Message", {
-                {"Stock Locate", msg.stockLocate},
-                {"Tracking Number", msg.trackingNumber},
-                {"Timestamp", msg.timestamp},
+                {"Stock Locate", msg.header.stockLocate},
+                {"Tracking Number", msg.header.trackingNumber},
+                {"Timestamp", msg.header.timestamp},
                 {"Stock", msg.stock},
                 {"Market Category", std::string(1, msg.marketCategory)},
                 {"Financial Status Indicator", std::string(1, msg.financialStatusIndicator)},
@@ -62,9 +62,9 @@ void printStockTradingActionMessage(const StockTradingActionMessage& msg)
 {
     const json j = {
         {"Stock Trading Action Message", {
-            {"Stock Locate", msg.stockLocate},
-            {"Tracking Number", msg.trackingNumber},
-            {"Timestamp", msg.timestamp},
+            {"Stock Locate", msg.header.stockLocate},
+            {"Tracking Number", msg.header.trackingNumber},
+            {"Timestamp", msg.header.timestamp},
             {"Stock", msg.stock},
             {"Trading State", std::string(1, msg.tradingState)},
             {"Reserved", std::string(1, msg.reserved)},
@@ -84,8 +84,8 @@ void printRegSHORestrictionMessage(const RegSHORestrictionMessage& msg)
     const json j = {
         {"Reg SHO Restriction Message", {
             {"Locate Code", msg.locateCode},
-            {"Tracking Number", msg.trackingNumber},
-            {"Timestamp", msg.timestamp},
+            {"Tracking Number", msg.header.trackingNumber},
+            {"Timestamp", msg.header.timestamp},
             {"Stock", msg.stock},
             {"Reg SHO Action", std::string(1, msg.regSHOAction)}
         }}
@@ -103,9 +103,9 @@ void printMarketParticipantPositionMessage(
 {
     const json j = {
         {"Market Participant Position Message", {
-            {"Stock Locate", msg.stockLocate},
-            {"Tracking Number", msg.trackingNumber},
-            {"Timestamp", msg.timestamp},
+            {"Stock Locate", msg.header.stockLocate},
+            {"Tracking Number", msg.header.trackingNumber},
+            {"Timestamp", msg.header.timestamp},
             {"MPID", msg.mpid},
             {"Stock", msg.stock},
             {"Primary Market Maker", std::string(1, msg.primaryMarketMaker)},
@@ -125,9 +125,9 @@ void printMWCBDeclineLevelMessage(const MWCBDeclineLevelMessage& msg)
 {
     const json j = {
         {"MWCB Decline Level Message", {
-            {"Stock Locate", msg.stockLocate},
-            {"Tracking Number", msg.trackingNumber},
-            {"Timestamp", msg.timestamp},
+            {"Stock Locate", msg.header.stockLocate},
+            {"Tracking Number", msg.header.trackingNumber},
+            {"Timestamp", msg.header.timestamp},
             {"Level 1", msg.level1},
             {"Level 2", msg.level2},
             {"Level 3", msg.level3}
@@ -145,9 +145,9 @@ void printMWCBStatusMessage(const MWCBStatusMessage& msg)
 {
     const json j = {
         {"MWCB Status Message", {
-            {"Stock Locate", msg.stockLocate},
-            {"Tracking Number", msg.trackingNumber},
-            {"Timestamp", msg.timestamp},
+            {"Stock Locate", msg.header.stockLocate},
+            {"Tracking Number", msg.header.trackingNumber},
+            {"Timestamp", msg.header.timestamp},
             {"Breached Level", std::string(1, msg.breachedLevel)}
         }}
     };
@@ -164,9 +164,9 @@ void printIPOQuotingPeriodUpdateMessage(
 {
     const json j = {
         {"IPO Quoting Period Update Message", {
-            {"Stock Locate", msg.stockLocate},
-            {"Tracking Number", msg.trackingNumber},
-            {"Timestamp", msg.timestamp},
+            {"Stock Locate", msg.header.stockLocate},
+            {"Tracking Number", msg.header.trackingNumber},
+            {"Timestamp", msg.header.timestamp},
             {"Stock", msg.stock},
             {"IPO Quotation Release Time", msg.ipoQuotationReleaseTime},
             {"IPO Quotation Release Qualifier",
@@ -186,17 +186,14 @@ void printLULDAuctionCollarMessage(const LULDAuctionCollarMessage& msg)
 {
     const json j = {
         {"LULD Auction Collar Message", {
-            {"Stock Locate", msg.stockLocate},
-            {"Tracking Number", msg.trackingNumber},
-            {"Timestamp", msg.timestamp},
+            {"Stock Locate", msg.header.stockLocate},
+            {"Tracking Number", msg.header.trackingNumber},
+            {"Timestamp", msg.header.timestamp},
             {"Stock", msg.stock},
             {"Auction Collar Reference Price", msg.auctionCollarReferencePrice},
             {"Upper Auction Collar Price", msg.upperAuctionCollarPrice},
             {"Lower Auction Collar Price", msg.lowerAuctionCollarPrice},
-            {"Auction Collar Extension", msg.AuctionCollarExtension},
-            {"IPO Quotation Release Qualifier",
-                std::string(1, msg.ipoQuotationReleaseQualifier)},
-            {"IPO Price", msg.ipoPrice}
+            {"Auction Collar Extension", msg.AuctionCollarExtension}
         }}
     };
 
@@ -211,9 +208,9 @@ void printOperationalHaltMessage(const OperationalHaltMessage& msg)
 {
     const json j = {
         {"Operational Halt Message", {
-            {"Stock Locate", msg.stockLocate},
-            {"Tracking Number", msg.trackingNumber},
-            {"Timestamp", msg.timestamp},
+            {"Stock Locate", msg.header.stockLocate},
+            {"Tracking Number", msg.header.trackingNumber},
+            {"Timestamp", msg.header.timestamp},
             {"Stock", msg.stock},
             {"Market Code", std::string(1, msg.marketCode)},
             {"Operational Halt Action", std::string(1, msg.operationalHaltAction)}
@@ -231,9 +228,9 @@ void printAddOrderMessage(const AddOrderMessage& msg)
 {
     const json j = {
         {"Add Order Message", {
-            {"Stock Locate", msg.stockLocate},
-            {"Tracking Number", msg.trackingNumber},
-            {"Timestamp", msg.timestamp},
+            {"Stock Locate", msg.header.stockLocate},
+            {"Tracking Number", msg.header.trackingNumber},
+            {"Timestamp", msg.header.timestamp},
             {"Order Reference Number", msg.orderReferenceNumber},
             {"Buy/Sell Indicator", std::string(1, msg.bSIndicator)},
             {"Shares", msg.shares},
@@ -253,9 +250,9 @@ void printAddOrderMPIDMessage(const AddOrderMPIDMessage& msg)
 {
     const json j = {
         {"Add Order With MPID Attribution Message", {
-            {"Stock Locate", msg.stockLocate},
-            {"Tracking Number", msg.trackingNumber},
-            {"Timestamp", msg.timestamp},
+            {"Stock Locate", msg.header.stockLocate},
+            {"Tracking Number", msg.header.trackingNumber},
+            {"Timestamp", msg.header.timestamp},
             {"Order Reference Number", msg.orderReferenceNumber},
             {"Buy/Sell Indicator", std::string(1, msg.bSIndicator)},
             {"Shares", msg.shares},
@@ -276,9 +273,9 @@ void printOrderExecutedMessage(const OrderExecutedMessage& msg)
 {
     json j = {
         {"Order Executed Message", {
-            {"Stock Locate", msg.stockLocate},
-            {"Tracking Number", msg.trackingNumber},
-            {"Timestamp", msg.timestamp},
+            {"Stock Locate", msg.header.stockLocate},
+            {"Tracking Number", msg.header.trackingNumber},
+            {"Timestamp", msg.header.timestamp},
             {"Order Reference Number", msg.orderReferenceNumber},
             {"Executed Shares", msg.executedShares},
             {"Match Number", msg.matchNumber}
@@ -296,9 +293,9 @@ void printOrderExecutedWithPriceMessage(const OrderExecutedWithPriceMessage& msg
 {
     json j = {
         {"Order Executed With Price Message", {
-            {"Stock Locate", msg.stockLocate},
-            {"Tracking Number", msg.trackingNumber},
-            {"Timestamp", msg.timestamp},
+            {"Stock Locate", msg.header.stockLocate},
+            {"Tracking Number", msg.header.trackingNumber},
+            {"Timestamp", msg.header.timestamp},
             {"Order Reference Number", msg.orderReferenceNumber},
             {"Executed Shares", msg.executedShares},
             {"Match Number", msg.matchNumber},
@@ -318,9 +315,9 @@ void printOrderCancelMessage(const OrderCancelMessage& msg)
 {
     json j = {
         {"Order Cancel Message", {
-            {"Stock Locate", msg.stockLocate},
-            {"Tracking Number", msg.trackingNumber},
-            {"Timestamp", msg.timestamp},
+            {"Stock Locate", msg.header.stockLocate},
+            {"Tracking Number", msg.header.trackingNumber},
+            {"Timestamp", msg.header.timestamp},
             {"Order Reference Number", msg.orderReferenceNumber},
             {"Cancelled Shares", msg.cancelledShares}
         }}
@@ -337,9 +334,9 @@ void printOrderDeleteMessage(const OrderDeleteMessage& msg)
 {
     json j = {
         {"Order Delete Message", {
-            {"Stock Locate", msg.stockLocate},
-            {"Tracking Number", msg.trackingNumber},
-            {"Timestamp", msg.timestamp},
+            {"Stock Locate", msg.header.stockLocate},
+            {"Tracking Number", msg.header.trackingNumber},
+            {"Timestamp", msg.header.timestamp},
             {"Order Reference Number", msg.orderReferenceNumber}
         }}
     };
@@ -355,9 +352,9 @@ void printOrderReplaceMessage(const OrderReplaceMessage& msg)
 {
     json j = {
         {"Order Replace Message", {
-            {"Stock Locate", msg.stockLocate},
-            {"Tracking Number", msg.trackingNumber},
-            {"Timestamp", msg.timestamp},
+            {"Stock Locate", msg.header.stockLocate},
+            {"Tracking Number", msg.header.trackingNumber},
+            {"Timestamp", msg.header.timestamp},
             {"Original Order Reference Number", msg.originalOrderReferenceNumber},
             {"New Order Reference Number", msg.newOrderReferenceNumber},
             {"Shares", msg.shares},
@@ -376,9 +373,9 @@ void printTradeMessage(const TradeMessage& msg)
 {
     json j = {
         {"Trade Message", {
-            {"Stock Locate", msg.stockLocate},
-            {"Tracking Number", msg.trackingNumber},
-            {"Timestamp", msg.timestamp},
+            {"Stock Locate", msg.header.stockLocate},
+            {"Tracking Number", msg.header.trackingNumber},
+            {"Timestamp", msg.header.timestamp},
             {"Order Reference Number", msg.orderReferenceNumber},
             {"Buy/Sell Indicator", std::string(1, msg.buySellIndicator)},
             {"Shares", msg.shares},
@@ -399,9 +396,9 @@ void printCrossTradeMessage(const CrossTradeMessage& msg)
 {
     json j = {
         {"Cross Trade Message", {
-            {"Stock Locate", msg.stockLocate},
-            {"Tracking Number", msg.trackingNumber},
-            {"Timestamp", msg.timestamp},
+            {"Stock Locate", msg.header.stockLocate},
+            {"Tracking Number", msg.header.trackingNumber},
+            {"Timestamp", msg.header.timestamp},
             {"Shares", msg.shares},
             {"Stock", msg.stock},
             {"Cross Price", msg.crossPrice},
@@ -421,9 +418,9 @@ void printBrokenTradeMessage(const BrokenTradeMessage& msg)
 {
     json j = {
         {"Broken Trade Message", {
-            {"Stock Locate", msg.stockLocate},
-            {"Tracking Number", msg.trackingNumber},
-            {"Timestamp", msg.timestamp},
+            {"Stock Locate", msg.header.stockLocate},
+            {"Tracking Number", msg.header.trackingNumber},
+            {"Timestamp", msg.header.timestamp},
             {"Match Number", msg.matchNumber}
         }}
     };
@@ -439,9 +436,9 @@ void printNOIIMessage(const NOIIMessage& msg)
 {
     json j = {
         {"Net Order Imbalance Indicator Message", {
-            {"Stock Locate", msg.stockLocate},
-            {"Tracking Number", msg.trackingNumber},
-            {"Timestamp", msg.timestamp},
+            {"Stock Locate", msg.header.stockLocate},
+            {"Tracking Number", msg.header.trackingNumber},
+            {"Timestamp", msg.header.timestamp},
             {"Paired Shares", msg.pairedShares},
             {"Imbalance Shares", msg.imbalanceShares},
             {"Imbalance Direction", std::string(1, msg.imbalanceDirection)},
@@ -465,9 +462,9 @@ void printRetailPriceImprovementMessage(const RetailPriceImprovementMessage& msg
 {
     json j = {
         {"Retail Price Improvement Indicator Message", {
-            {"Stock Locate", msg.stockLocate},
-            {"Tracking Number", msg.trackingNumber},
-            {"Timestamp", msg.timestamp},
+            {"Stock Locate", msg.header.stockLocate},
+            {"Tracking Number", msg.header.trackingNumber},
+            {"Timestamp", msg.header.timestamp},
             {"Stock", msg.stock},
             {"Interest Flag", std::string(1, msg.interestFlag)}
         }}
@@ -484,9 +481,9 @@ void printDirectListingCapitalRaiseMessage(const DirectListingCapitalRaiseMessag
 {
     json j = {
         {"Direct Listing With Capital Raise Message", {
-            {"Stock Locate", msg.stockLocate},
-            {"Tracking Number", msg.trackingNumber},
-            {"Timestamp", msg.timestamp},
+            {"Stock Locate", msg.header.stockLocate},
+            {"Tracking Number", msg.header.trackingNumber},
+            {"Timestamp", msg.header.timestamp},
             {"Stock", msg.stock},
             {"Open Eligibility Status", std::string(1, msg.openEligibilityStatus)},
             {"Minimum Allowable Price", msg.minimumAllowablePrice},

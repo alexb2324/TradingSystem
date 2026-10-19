@@ -1,4 +1,5 @@
 #include "MarketDataParser.h"
+#include <cstring>
 
 
 static std::string readPaddedString(const std::span<const std::uint8_t> message, const std::size_t offset, const std::size_t length)
@@ -78,11 +79,11 @@ std::uint64_t MessageParser::readBigEndian(const std::span<const std::uint8_t> d
 
 SystemEventMessage MessageParser::parseSystemEventMessage(std::span<const std::uint8_t> message)
 {
-    SystemEventMessage result{};
+    SystemEventMessage result {};
 
-    result.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
-    result.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
-    result.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
+    result.header.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
     result.eventCode = static_cast<char>(message[11]);
 
     return result;
@@ -93,16 +94,12 @@ StockDirectoryMessage MessageParser::parseStockDirectoryMessage(std::span<const 
 
     StockDirectoryMessage result {};
 
-    result.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
-    result.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
-    result.timestamp = readBigEndian({message.data() + 5, 6});
-    result.stock = std::string(reinterpret_cast<const char*>(message.data() + 11), 8);
+    result.header.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
+    result.header.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
 
-    // Trim trailing spaces
-    while (!result.stock.empty() && result.stock.back() == ' ')
-    {
-        result.stock.pop_back();
-    }
+    // Copy stock symbol
+    std::copy_n(message.data() + 11, result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
 
     result.marketCategory = static_cast<char>(message[19]);
     result.financialStatusIndicator = static_cast<char>(message[20]);
@@ -110,8 +107,8 @@ StockDirectoryMessage MessageParser::parseStockDirectoryMessage(std::span<const 
     result.roundLotsOnly = static_cast<char>(message[25]);
     result.issueClassification = static_cast<char>(message[26]);
 
-    // Issue sub-type: 2 bytes.
-    result.issueSubType = std::string(reinterpret_cast<const char*>(message.data() + 27), 2);
+    // Copy issue sub-type
+    std::copy_n(message.data() + 27, result.issueSubType.size(), result.issueSubType.begin());
     result.authenticity = static_cast<char>(message[29]);
     result.shortSaleThresholdIndicator = static_cast<char>(message[30]);
     result.ipoFlag = static_cast<char>(message[31]);
@@ -128,13 +125,17 @@ StockTradingActionMessage MessageParser::parseStockTradingActionMessage(std::spa
 
     StockTradingActionMessage result{};
 
-    result.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
-    result.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
-    result.timestamp = readBigEndian({message.data() + 5, 6});
-    result.stock = readPaddedString(message, 11, 8);
+    result.header.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
+    result.header.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
+
+    // Copy stock symbol
+    std::copy_n(message.data() + 11, result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
+
+    // Copy trading action reason
+    std::copy_n(message.data() + 21, result.tradingActionReason.size(), result.tradingActionReason.begin());
     result.tradingState = static_cast<char>(message[19]);
     result.reserved = static_cast<char>(message[20]);
-    result.tradingActionReason = std::string(reinterpret_cast<const char*>(message.data() + 21), 4);
 
     return result;
 }
@@ -143,10 +144,12 @@ RegSHORestrictionMessage MessageParser::parseRegSHORestrictionMessage(std::span<
 {
     RegSHORestrictionMessage result{};
 
-    result.locateCode = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
-    result.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
-    result.timestamp = readBigEndian({message.data() + 5, 6});
-    result.stock = readPaddedString(message, 11, 8);
+    result.header.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
+    result.header.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
+
+    // Copy stock symbol
+    std::copy_n(message.data() + 11, result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
     result.regSHOAction = static_cast<char>(message[19]);
 
     return result;
@@ -156,11 +159,15 @@ MarketParticipantPositionMessage MessageParser::parseMarketParticipantPositionMe
 {
     MarketParticipantPositionMessage result{};
 
-    result.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
-    result.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
-    result.timestamp = readBigEndian({message.data() + 5, 6});
-    result.mpid = readPaddedString(message, 11, 4);
-    result.stock = readPaddedString(message, 15, 8);
+    result.header.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
+    result.header.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
+
+    // Copy MPID
+    std::copy_n(message.data() + 11, result.mpid.size(), result.mpid.begin());
+
+    // Copy stock symbol
+    std::copy_n(message.data() + 15, result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
     result.primaryMarketMaker = static_cast<char>(message[23]);
     result.marketMakerMode = static_cast<char>(message[24]);
     result.marketParticipantState = static_cast<char>(message[25]);
@@ -172,9 +179,9 @@ MWCBDeclineLevelMessage MessageParser::parseMWCBDeclineLevelMessage(std::span<co
 {
     MWCBDeclineLevelMessage result{};
 
-    result.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
-    result.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
-    result.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
+    result.header.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
     result.level1 = readBigEndian({message.data() + 11, 8});
     result.level2 = readBigEndian({message.data() + 19, 8});
     result.level3 = readBigEndian({message.data() + 27, 8});
@@ -186,9 +193,9 @@ MWCBStatusMessage MessageParser::parseMWCBStatusMessage(std::span<const std::uin
 {
     MWCBStatusMessage result{};
 
-    result.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
-    result.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
-    result.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
+    result.header.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
     result.breachedLevel = static_cast<char>(message[11]);
 
     return result;
@@ -198,10 +205,12 @@ IPOQuotingPeriodUpdateMessage MessageParser::parseIPOQuotingPeriodUpdateMessage(
 {
     IPOQuotingPeriodUpdateMessage result{};
 
-    result.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
-    result.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
-    result.timestamp = readBigEndian({message.data() + 5, 6});
-    result.stock = readPaddedString(message, 11, 8);
+    result.header.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
+    result.header.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
+
+    // Copy stock symbol
+    std::copy_n(message.data() + 11, result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
     result.ipoQuotationReleaseTime = static_cast<std::uint32_t>(readBigEndian({message.data() + 19, 4}));
     result.ipoQuotationReleaseQualifier = static_cast<char>(message[23]);
     result.ipoPrice = static_cast<std::uint32_t>(readBigEndian({message.data() + 24, 4}));
@@ -213,10 +222,12 @@ LULDAuctionCollarMessage MessageParser::parseLULDAuctionCollarMessage(std::span<
 {
     LULDAuctionCollarMessage result{};
 
-    result.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
-    result.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
-    result.timestamp = readBigEndian({message.data() + 5, 6});
-    result.stock = readPaddedString(message, 11, 8);
+    result.header.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
+    result.header.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
+
+    // Copy stock symbol
+    std::copy_n(message.data() + 11, result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
     result.auctionCollarReferencePrice = static_cast<std::uint32_t>(readBigEndian({message.data() + 19, 4}));
     result.upperAuctionCollarPrice = static_cast<std::uint32_t>(readBigEndian({message.data() + 23, 4}));
     result.lowerAuctionCollarPrice = static_cast<std::uint32_t>(readBigEndian({message.data() + 27, 4}));
@@ -229,10 +240,12 @@ OperationalHaltMessage MessageParser::parseOperationalHaltMessage(std::span<cons
 {
     OperationalHaltMessage result{};
 
-    result.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
-    result.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
-    result.timestamp = readBigEndian({message.data() + 5, 6});
-    result.stock = readPaddedString(message, 11, 8);
+    result.header.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
+    result.header.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
+
+    // Copy stock symbol
+    std::copy_n(message.data() + 11, result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
     result.marketCode = static_cast<char>(message[19]);
     result.operationalHaltAction = static_cast<char>(message[20]);
 
@@ -243,13 +256,12 @@ AddOrderMessage MessageParser::parseAddOrderMessage(std::span<const std::uint8_t
 {
     AddOrderMessage result{};
 
-    result.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
-    result.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
-    result.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
+    result.header.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
     result.orderReferenceNumber = readBigEndian({message.data() + 11, 8});
     result.bSIndicator = static_cast<char>(message[19]);
     result.shares = static_cast<std::uint32_t>(readBigEndian({message.data() + 20, 4}));
-    result.stock = readPaddedString(message, 24, 8);
     result.price = static_cast<std::uint32_t>(readBigEndian({message.data() + 32, 4}));
 
     return result;
@@ -259,15 +271,16 @@ AddOrderMPIDMessage MessageParser::parseAddOrderMPIDMessage(std::span<const std:
 {
     AddOrderMPIDMessage result{};
 
-    result.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
-    result.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
-    result.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
+    result.header.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
     result.orderReferenceNumber = readBigEndian({message.data() + 11, 8});
     result.bSIndicator = static_cast<char>(message[19]);
     result.shares = static_cast<std::uint32_t>(readBigEndian({message.data() + 20, 4}));
-    result.stock = readPaddedString(message, 24, 8);
     result.price = static_cast<std::uint32_t>(readBigEndian({message.data() + 32, 4}));
-    result.attribution = std::string(reinterpret_cast<const char*>(message.data() + 36), 4);
+
+    // Copy attribution
+    std::copy_n(message.data() + 36, result.attribution.size(), result.attribution.begin());
 
     return result;
 }
@@ -276,9 +289,9 @@ OrderExecutedMessage MessageParser::parseOrderExecutedMessage(std::span<const st
 {
     OrderExecutedMessage result{};
 
-    result.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
-    result.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
-    result.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
+    result.header.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
     result.orderReferenceNumber = readBigEndian({message.data() + 11, 8});
     result.executedShares = static_cast<std::uint32_t>(readBigEndian({message.data() + 19, 4}));
     result.matchNumber = readBigEndian({message.data() + 23, 8});
@@ -290,9 +303,9 @@ OrderExecutedWithPriceMessage MessageParser::parseOrderExecutedWithPriceMessage(
 {
     OrderExecutedWithPriceMessage result{};
 
-    result.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
-    result.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
-    result.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
+    result.header.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
     result.orderReferenceNumber = readBigEndian({message.data() + 11, 8});
     result.executedShares = static_cast<std::uint32_t>(readBigEndian({message.data() + 19, 4}));
     result.matchNumber = readBigEndian({message.data() + 23, 8});
@@ -306,9 +319,9 @@ OrderCancelMessage MessageParser::parseOrderCancelMessage(std::span<const std::u
 {
     OrderCancelMessage result{};
 
-    result.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
-    result.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
-    result.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
+    result.header.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
     result.orderReferenceNumber = readBigEndian({message.data() + 11, 8});
     result.cancelledShares = static_cast<std::uint32_t>(readBigEndian({message.data() + 19, 4}));
 
@@ -319,9 +332,9 @@ OrderDeleteMessage MessageParser::parseOrderDeleteMessage(std::span<const std::u
 {
     OrderDeleteMessage result{};
 
-    result.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
-    result.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
-    result.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
+    result.header.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
     result.orderReferenceNumber = readBigEndian({message.data() + 11, 8});
 
     return result;
@@ -331,9 +344,9 @@ OrderReplaceMessage MessageParser::parseOrderReplaceMessage(std::span<const std:
 {
     OrderReplaceMessage result{};
 
-    result.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
-    result.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
-    result.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
+    result.header.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
     result.originalOrderReferenceNumber = readBigEndian({message.data() + 11, 8});
     result.newOrderReferenceNumber = readBigEndian({message.data() + 19, 8});
     result.shares = static_cast<std::uint32_t>(readBigEndian({message.data() + 27, 4}));
@@ -346,13 +359,12 @@ TradeMessage MessageParser::parseTradeMessage(std::span<const std::uint8_t> mess
 {
     TradeMessage result{};
 
-    result.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
-    result.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
-    result.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
+    result.header.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
     result.orderReferenceNumber = readBigEndian({message.data() + 11, 8});
     result.buySellIndicator = static_cast<char>(message[19]);
     result.shares = static_cast<std::uint32_t>(readBigEndian({message.data() + 20, 4}));
-    result.stock = readPaddedString(message, 24, 8);
     result.price = static_cast<std::uint32_t>(readBigEndian({message.data() + 32, 4}));
     result.matchNumber = readBigEndian({message.data() + 36, 8});
 
@@ -363,11 +375,10 @@ CrossTradeMessage MessageParser::parseCrossTradeMessage(std::span<const std::uin
 {
     CrossTradeMessage result{};
 
-    result.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
-    result.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
-    result.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
+    result.header.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
     result.shares = readBigEndian({message.data() + 11, 8});
-    result.stock = readPaddedString(message, 19, 8);
     result.crossPrice = static_cast<std::uint32_t>(readBigEndian({message.data() + 27, 4}));
     result.matchNumber = readBigEndian({message.data() + 31, 8});
     result.crossType = static_cast<char>(message[39]);
@@ -379,9 +390,9 @@ BrokenTradeMessage MessageParser::parseBrokenTradeMessage(std::span<const std::u
 {
     BrokenTradeMessage result{};
 
-    result.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
-    result.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
-    result.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
+    result.header.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
     result.matchNumber = readBigEndian({message.data() + 11, 8});
 
     return result;
@@ -392,13 +403,12 @@ NOIIMessage MessageParser::parseNOIIMessage(std::span<const std::uint8_t> messag
 
     NOIIMessage result{};
 
-    result.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
-    result.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
-    result.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
+    result.header.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
     result.pairedShares = readBigEndian({message.data() + 11, 8});
     result.imbalanceShares = readBigEndian({message.data() + 19, 8});
     result.imbalanceDirection = static_cast<char>(message[27]);
-    result.stock = readPaddedString(message, 28, 8);
     result.farPrice = static_cast<std::uint32_t>(readBigEndian({message.data() + 36, 4}));
     result.nearPrice = static_cast<std::uint32_t>(readBigEndian({message.data() + 40, 4}));
     result.currentReferencePrice = static_cast<std::uint32_t>(readBigEndian({message.data() + 44, 4}));
@@ -413,10 +423,9 @@ RetailPriceImprovementMessage MessageParser::parseRetailPriceImprovementMessage(
 
     RetailPriceImprovementMessage result{};
 
-    result.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
-    result.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
-    result.timestamp = readBigEndian({message.data() + 5, 6});
-    result.stock = readPaddedString(message, 11, 8);
+    result.header.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
+    result.header.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
     result.interestFlag = static_cast<char>(message[19]);
 
     return result;
@@ -426,10 +435,9 @@ DirectListingCapitalRaiseMessage MessageParser::parseDirectListingCapitalRaiseMe
 {
     DirectListingCapitalRaiseMessage result{};
 
-    result.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
-    result.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
-    result.timestamp = readBigEndian({message.data() + 5, 6});
-    result.stock = readPaddedString(message, 11, 8);
+    result.header.timestamp = readBigEndian({message.data() + 5, 6});
+    result.header.trackingNumber = static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
+    result.header.stockLocate = static_cast<std::uint16_t>(readBigEndian({message.data() + 1, 2}));
     result.openEligibilityStatus = static_cast<char>(message[19]);
     result.minimumAllowablePrice = static_cast<std::uint32_t>(readBigEndian({message.data() + 20, 4}));
     result.maximumAllowablePrice = static_cast<std::uint32_t>(readBigEndian({message.data() + 24, 4}));
