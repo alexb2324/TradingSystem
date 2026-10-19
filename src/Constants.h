@@ -1,5 +1,9 @@
 #pragma once
 
+#include <limits>
+#include <cstdint>
+#include <cstddef>
+
 struct Constants
 {
     static constexpr std::size_t kMaxMessageLength = 64;

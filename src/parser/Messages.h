@@ -2,6 +2,8 @@
 
 #include <cstdint>
 #include <array>
+#include <string_view>
+
 enum class MessageType : char
 {
     SystemEventMessage = 'S',
@@ -38,6 +40,12 @@ enum class MessageType : char
 struct Symbol
 {
     std::array<char, 8> symbolPadded;
+
+    [[nodiscard]] std::string_view unpaddedSymbol()
+    {
+        std::string_view symbol {symbolPadded.data(), symbolPadded.size()};
+        return symbol.substr(0, symbol.find_first_not_of(' ') + 1);
+    };
 };
 
 

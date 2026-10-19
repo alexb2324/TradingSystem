@@ -53,13 +53,8 @@ public:
     DirectListingCapitalRaiseMessage parseDirectListingCapitalRaiseMessage(std::span<const std::uint8_t> message);
 
 private:
-
-
     std::array<uint8_t, Constants::kMaxMessageLength> messageBuffer_ {};
     std::ifstream file_;
     uint64_t msgLength_ {};
-
-private:
-    std::uint64_t readBigEndian(const std::span<const std::uint8_t> data);
 
 };
