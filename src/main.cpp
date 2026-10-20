@@ -107,7 +107,6 @@ int main()
                 {
                     const auto msg = messageParser.parseAddOrderMessage(message);
                     //printAddOrderMessage(msg);
-                    stockDirectory.displayAllStocks();
                     break;
                 }
                 case MessageType::AddOrderMPIDMessage:
@@ -120,12 +119,16 @@ int main()
                 {
                     const auto msg = messageParser.parseOrderExecutedMessage(message);
                     //printOrderExecutedMessage(msg);
+                    tradeBook.addExecutedOrder(msg);
+                    tradeBook.displayLastExecutedOrder();
                     break;
                 }
                 case MessageType::OrderExecutedWithPriceMessage:
                 {
                     const auto msg = messageParser.parseOrderExecutedWithPriceMessage(message);
                     //printOrderExecutedWithPriceMessage(msg);
+                    tradeBook.addExecutedPriceOrder(msg);
+                    tradeBook.displayLastExecutedPriceOrder();
                     break;
                 }
                 case MessageType::OrderCancelMessage:
@@ -149,19 +152,23 @@ int main()
                 case MessageType::TradeMessage:
                 {
                     const auto msg = messageParser.parseTradeMessage(message);
-                    //tradeBook.addTrade(msg);
-                    //tradeBook.displayMostRecentTrade();
+                    tradeBook.addTrade(msg);
+                    tradeBook.displayLastTrade();
                     break;
                 }
                 case MessageType::CrossTradeMessage:
                 {
                     const auto msg = messageParser.parseCrossTradeMessage(message);
+                    tradeBook.addCrossTrade(msg);
+                    tradeBook.displayLastCrossTrade();
                    // printCrossTradeMessage(msg);
                     break;
                 }
                 case MessageType::BrokenTradeMessage:
                 {
                     const auto msg = messageParser.parseBrokenTradeMessage(message);
+                    tradeBook.addBrokenTrade(msg);
+                    tradeBook.displayLastBrokenTrade();
                     //printBrokenTradeMessage(msg);
                     break;
                 }

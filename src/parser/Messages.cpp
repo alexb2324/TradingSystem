@@ -8,7 +8,7 @@ using json = nlohmann::json;
 // ------------------------------------------------------------
 // System Event Message ('S')
 // ------------------------------------------------------------
-
+/*
 void printSystemEventMessage(const SystemEventMessage& msg)
 {
     const json j = {
@@ -492,3 +492,4 @@ void printDirectListingCapitalRaiseMessage(const DirectListingCapitalRaiseMessag
 
     std::cout << j.dump(4) << '\n';
 }
+*/

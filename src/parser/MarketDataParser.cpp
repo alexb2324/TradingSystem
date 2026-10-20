@@ -288,7 +288,7 @@ OrderExecutedWithPriceMessage MessageParser::parseOrderExecutedWithPriceMessage(
     result.executedShares = convertBLEndian<std::uint32_t>(message.data() + 19);
     result.matchNumber = convertBLEndian<std::uint64_t>(message.data() + 23);
     result.printable = static_cast<char>(message[31]);
-    result.executionPrice = convertBLEndian<std::uint32_t>(message.data() + 32);
+    result.executionPrice.priceOriginal = convertBLEndian<std::uint32_t>(message.data() + 32);
 
     return result;
 }
@@ -359,8 +359,11 @@ CrossTradeMessage MessageParser::parseCrossTradeMessage(std::span<const std::uin
     result.header.timestamp = convertBLEndian48(message.data() + 5);
     result.header.trackingNumber = convertBLEndian<std::uint16_t>(message.data() + 3);
     result.header.stockLocate = convertBLEndian<std::uint16_t>(message.data() + 1);
+
+    // Copy stock symbol
+    std::copy_n(message.data() + 19, result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
     result.shares = convertBLEndian<std::uint64_t>(message.data() + 11);
-    result.crossPrice = convertBLEndian<std::uint32_t>(message.data() + 27);
+    result.crossPrice.priceOriginal = convertBLEndian<std::uint32_t>(message.data() + 27);
     result.matchNumber = convertBLEndian<std::uint64_t>(message.data() + 31);
     result.crossType = static_cast<char>(message[39]);
 

@@ -41,7 +41,7 @@ enum class MessageType : char
 
 struct Price
 {
-    std::uint64_t priceOriginal;
+    std::uint32_t priceOriginal;
 
     [[nodiscard]] double displayPrice() const
     {
@@ -220,7 +220,7 @@ struct OrderExecutedWithPriceMessage {
     std::uint64_t orderReferenceNumber;
     std::uint64_t matchNumber;
     std::uint32_t executedShares;
-    std::uint32_t executionPrice;
+    Price executionPrice;
     char printable;
 };
 
@@ -257,8 +257,8 @@ struct TradeMessage {
     Header header;
     std::uint64_t orderReferenceNumber{};
     std::uint64_t matchNumber{};
-    std::uint32_t shares{};
     Symbol stock{};
+    std::uint32_t shares{};
     Price price{};
     char buySellIndicator{};
 };
@@ -269,7 +269,8 @@ struct CrossTradeMessage {
     Header header;
     std::uint64_t shares{};
     std::uint64_t matchNumber{};
-    std::uint32_t crossPrice{};
+    Symbol stock{};
+    Price crossPrice{};
     char crossType{};
 };
 

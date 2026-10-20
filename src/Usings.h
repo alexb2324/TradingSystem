@@ -3,7 +3,6 @@
 #include <array>
 #include <cstdint>
 
-
 struct Symbol
 {
     std::array<char, 8> symbolPadded;
