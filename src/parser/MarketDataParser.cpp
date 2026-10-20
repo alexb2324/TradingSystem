@@ -1,5 +1,6 @@
 #include "MarketDataParser.h"
 #include <cstring>
+#include <iostream>
 
 
 template <std::unsigned_integral T>
@@ -32,16 +33,11 @@ bool MessageParser::readNextMessage()
     if (bytesRead == 0 && file_.eof()) { return false; }
     if (bytesRead != 2) { throw std::runtime_error("Truncated message length prefix"); }
 
-    const auto length = convertBLEndian<std::uint64_t>(lengthBuffer.data());
+    const auto length = convertBLEndian<std::uint16_t>(lengthBuffer.data());
 
     if (length == 0)
     {
         throw std::runtime_error("Invalid zero-length message");
-    }
-
-    if (length > messageBuffer_.size())
-    {
-        throw std::runtime_error("Message exceeds buffer capacity");
     }
 
     msgLength_ = static_cast<std::size_t>(length);
@@ -65,7 +61,6 @@ SystemEventMessage MessageParser::parseSystemEventMessage(std::span<const std::u
 
     result.header.timestamp = convertBLEndian48(message.data() + 5);
     result.header.trackingNumber = convertBLEndian<std::uint16_t>(message.data() + 3);
-        //static_cast<std::uint16_t>(readBigEndian({message.data() + 3, 2}));
     result.header.stockLocate = convertBLEndian<std::uint16_t>(message.data() + 1);
     result.eventCode = static_cast<char>(message[11]);
 
@@ -348,7 +343,10 @@ TradeMessage MessageParser::parseTradeMessage(std::span<const std::uint8_t> mess
     result.orderReferenceNumber = convertBLEndian<std::uint64_t>(message.data() + 11);
     result.buySellIndicator = static_cast<char>(message[19]);
     result.shares = convertBLEndian<std::uint32_t>(message.data() + 20);
-    result.price = convertBLEndian<std::uint32_t>(message.data() + 32);
+
+    // Copy stock symbol
+    std::copy_n(message.data() + 24, result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
+    result.price.priceOriginal = convertBLEndian<std::uint32_t>(message.data() + 32);
     result.matchNumber = convertBLEndian<std::uint64_t>(message.data() + 36);
 
     return result;

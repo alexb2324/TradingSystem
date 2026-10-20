@@ -4,6 +4,8 @@
 #include <array>
 #include <string_view>
 
+#include "../Usings.h"
+
 enum class MessageType : char
 {
     SystemEventMessage = 'S',
@@ -37,15 +39,14 @@ enum class MessageType : char
 };
 
 
-struct Symbol
+struct Price
 {
-    std::array<char, 8> symbolPadded;
+    std::uint64_t priceOriginal;
 
-    [[nodiscard]] std::string_view unpaddedSymbol()
+    [[nodiscard]] double displayPrice() const
     {
-        std::string_view symbol {symbolPadded.data(), symbolPadded.size()};
-        return symbol.substr(0, symbol.find_first_not_of(' ') + 1);
-    };
+        return static_cast<double>(priceOriginal) / 10'000.0;
+    }
 };
 
 
@@ -257,7 +258,8 @@ struct TradeMessage {
     std::uint64_t orderReferenceNumber{};
     std::uint64_t matchNumber{};
     std::uint32_t shares{};
-    std::uint32_t price{};
+    Symbol stock{};
+    Price price{};
     char buySellIndicator{};
 };
 

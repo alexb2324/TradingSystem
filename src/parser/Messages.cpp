@@ -29,25 +29,25 @@ void printSystemEventMessage(const SystemEventMessage& msg)
 
 void printStockDirectoryMessage(const StockDirectoryMessage& msg)
 {
-    json j = {
+    const json j = {
         {"Stock Directory Message", {
-                {"Stock Locate", msg.header.stockLocate},
-                {"Tracking Number", msg.header.trackingNumber},
-                {"Timestamp", msg.header.timestamp},
-                {"Stock", msg.stock},
-                {"Market Category", std::string(1, msg.marketCategory)},
-                {"Financial Status Indicator", std::string(1, msg.financialStatusIndicator)},
-                {"Round Lot Size", msg.roundLotSize},
-                {"Round Lots Only", std::string(1, msg.roundLotsOnly)},
-                {"Issue Classification", std::string(1, msg.issueClassification)},
-                {"Issue Sub-Type", msg.issueSubType},
-                {"Authenticity", std::string(1, msg.authenticity)},
-                {"Short Sale Threshold Indicator", std::string(1, msg.shortSaleThresholdIndicator)},
-                {"IPO Flag", std::string(1, msg.ipoFlag)},
-                {"LULD Reference Price Tier", std::string(1, msg.luldReferencePriceTier)},
-                {"ETP Flag", std::string(1, msg.etpFlag)},
-                {"ETP Leverage Factor", msg.etpLeverageFactor},
-                {"Inverse Indicator", std::string(1, msg.inverseIndicator)}
+            {"Stock Locate", msg.header.stockLocate},
+            {"Tracking Number", msg.header.trackingNumber},
+            {"Timestamp", msg.header.timestamp},
+            {"Stock", msg.stock.displaySymbol()},
+            {"Market Category", std::string(1, msg.marketCategory)},
+            {"Financial Status Indicator", std::string(1, msg.financialStatusIndicator)},
+            {"Round Lot Size", msg.roundLotSize},
+            {"Round Lots Only", std::string(1, msg.roundLotsOnly)},
+            {"Issue Classification", std::string(1, msg.issueClassification)},
+            {"Issue Sub-Type", msg.issueSubType},
+            {"Authenticity", std::string(1, msg.authenticity)},
+            {"Short Sale Threshold Indicator", std::string(1, msg.shortSaleThresholdIndicator)},
+            {"IPO Flag", std::string(1, msg.ipoFlag)},
+            {"LULD Reference Price Tier", std::string(1, msg.luldReferencePriceTier)},
+            {"ETP Flag", std::string(1, msg.etpFlag)},
+            {"ETP Leverage Factor", msg.etpLeverageFactor},
+            {"Inverse Indicator", std::string(1, msg.inverseIndicator)}
         }}
     };
 
@@ -60,12 +60,14 @@ void printStockDirectoryMessage(const StockDirectoryMessage& msg)
 
 void printStockTradingActionMessage(const StockTradingActionMessage& msg)
 {
+
+    std::string str(msg.stock.symbolPadded.data(), 4);
     const json j = {
         {"Stock Trading Action Message", {
             {"Stock Locate", msg.header.stockLocate},
             {"Tracking Number", msg.header.trackingNumber},
             {"Timestamp", msg.header.timestamp},
-            {"Stock", msg.stock},
+            {"Stock", str},
             {"Trading State", std::string(1, msg.tradingState)},
             {"Reserved", std::string(1, msg.reserved)},
             {"Trading Action Reason", msg.tradingActionReason}
@@ -83,10 +85,10 @@ void printRegSHORestrictionMessage(const RegSHORestrictionMessage& msg)
 {
     const json j = {
         {"Reg SHO Restriction Message", {
-            {"Locate Code", msg.locateCode},
+            {"Locate Code", msg.header.stockLocate},
             {"Tracking Number", msg.header.trackingNumber},
             {"Timestamp", msg.header.timestamp},
-            {"Stock", msg.stock},
+            {"Stock", msg.stock.displaySymbol()},
             {"Reg SHO Action", std::string(1, msg.regSHOAction)}
         }}
     };
@@ -98,16 +100,15 @@ void printRegSHORestrictionMessage(const RegSHORestrictionMessage& msg)
 // Market Participant Position Message ('L')
 // ------------------------------------------------------------
 
-void printMarketParticipantPositionMessage(
-    const MarketParticipantPositionMessage& msg)
+void printMarketParticipantPositionMessage(const MarketParticipantPositionMessage& msg)
 {
     const json j = {
         {"Market Participant Position Message", {
             {"Stock Locate", msg.header.stockLocate},
             {"Tracking Number", msg.header.trackingNumber},
             {"Timestamp", msg.header.timestamp},
-            {"MPID", msg.mpid},
-            {"Stock", msg.stock},
+            {"MPID", std::string {msg.mpid.data(), 4}},
+            {"Stock", msg.stock.displaySymbol() },
             {"Primary Market Maker", std::string(1, msg.primaryMarketMaker)},
             {"Market Maker Mode", std::string(1, msg.marketMakerMode)},
             {"Market Participant State", std::string(1, msg.marketParticipantState)}
@@ -167,7 +168,7 @@ void printIPOQuotingPeriodUpdateMessage(
             {"Stock Locate", msg.header.stockLocate},
             {"Tracking Number", msg.header.trackingNumber},
             {"Timestamp", msg.header.timestamp},
-            {"Stock", msg.stock},
+            {"Stock", msg.stock.displaySymbol()},
             {"IPO Quotation Release Time", msg.ipoQuotationReleaseTime},
             {"IPO Quotation Release Qualifier",
                 std::string(1, msg.ipoQuotationReleaseQualifier)},
@@ -189,7 +190,7 @@ void printLULDAuctionCollarMessage(const LULDAuctionCollarMessage& msg)
             {"Stock Locate", msg.header.stockLocate},
             {"Tracking Number", msg.header.trackingNumber},
             {"Timestamp", msg.header.timestamp},
-            {"Stock", msg.stock},
+            {"Stock", msg.stock.displaySymbol()},
             {"Auction Collar Reference Price", msg.auctionCollarReferencePrice},
             {"Upper Auction Collar Price", msg.upperAuctionCollarPrice},
             {"Lower Auction Collar Price", msg.lowerAuctionCollarPrice},
@@ -211,7 +212,7 @@ void printOperationalHaltMessage(const OperationalHaltMessage& msg)
             {"Stock Locate", msg.header.stockLocate},
             {"Tracking Number", msg.header.trackingNumber},
             {"Timestamp", msg.header.timestamp},
-            {"Stock", msg.stock},
+            {"Stock", msg.stock.displaySymbol()},
             {"Market Code", std::string(1, msg.marketCode)},
             {"Operational Halt Action", std::string(1, msg.operationalHaltAction)}
         }}
@@ -234,7 +235,6 @@ void printAddOrderMessage(const AddOrderMessage& msg)
             {"Order Reference Number", msg.orderReferenceNumber},
             {"Buy/Sell Indicator", std::string(1, msg.bSIndicator)},
             {"Shares", msg.shares},
-            {"Stock", msg.stock},
             {"Price", msg.price}
         }}
     };
@@ -256,7 +256,6 @@ void printAddOrderMPIDMessage(const AddOrderMPIDMessage& msg)
             {"Order Reference Number", msg.orderReferenceNumber},
             {"Buy/Sell Indicator", std::string(1, msg.bSIndicator)},
             {"Shares", msg.shares},
-            {"Stock", msg.stock},
             {"Price", msg.price},
             {"Attribution", msg.attribution}
         }}
@@ -379,8 +378,8 @@ void printTradeMessage(const TradeMessage& msg)
             {"Order Reference Number", msg.orderReferenceNumber},
             {"Buy/Sell Indicator", std::string(1, msg.buySellIndicator)},
             {"Shares", msg.shares},
-            {"Stock", msg.stock},
-            {"Price", msg.price},
+            {"Stock", msg.stock.displaySymbol()},
+            {"Price", msg.price.displayPrice()},
             {"Match Number", msg.matchNumber}
         }}
     };
@@ -400,7 +399,6 @@ void printCrossTradeMessage(const CrossTradeMessage& msg)
             {"Tracking Number", msg.header.trackingNumber},
             {"Timestamp", msg.header.timestamp},
             {"Shares", msg.shares},
-            {"Stock", msg.stock},
             {"Cross Price", msg.crossPrice},
             {"Match Number", msg.matchNumber},
             {"Cross Type", std::string(1, msg.crossType)}
@@ -442,7 +440,6 @@ void printNOIIMessage(const NOIIMessage& msg)
             {"Paired Shares", msg.pairedShares},
             {"Imbalance Shares", msg.imbalanceShares},
             {"Imbalance Direction", std::string(1, msg.imbalanceDirection)},
-            {"Stock", msg.stock},
             {"Far Price", msg.farPrice},
             {"Near Price", msg.nearPrice},
             {"Current Reference Price", msg.currentReferencePrice},
@@ -465,7 +462,6 @@ void printRetailPriceImprovementMessage(const RetailPriceImprovementMessage& msg
             {"Stock Locate", msg.header.stockLocate},
             {"Tracking Number", msg.header.trackingNumber},
             {"Timestamp", msg.header.timestamp},
-            {"Stock", msg.stock},
             {"Interest Flag", std::string(1, msg.interestFlag)}
         }}
     };
@@ -484,7 +480,6 @@ void printDirectListingCapitalRaiseMessage(const DirectListingCapitalRaiseMessag
             {"Stock Locate", msg.header.stockLocate},
             {"Tracking Number", msg.header.trackingNumber},
             {"Timestamp", msg.header.timestamp},
-            {"Stock", msg.stock},
             {"Open Eligibility Status", std::string(1, msg.openEligibilityStatus)},
             {"Minimum Allowable Price", msg.minimumAllowablePrice},
             {"Maximum Allowable Price", msg.maximumAllowablePrice},

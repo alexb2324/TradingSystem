@@ -15,4 +15,8 @@ add_executable(TradingSystem src/main.cpp
         src/Constants.h
         src/orderbook/LevelInfo.h
         src/orderbook/LevelInfo.h
+        src/Usings.h
+        src/tradebook/Tradebook.cpp
+        src/directory/StockDirectory.cpp
+        src/directory/StockDirectory.h
 )

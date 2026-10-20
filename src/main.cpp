@@ -9,6 +9,10 @@
 #include "parser/Messages.h"
 #include "parser/MarketDataParser.h"
 
+#include "tradebook/Tradebook.h"
+
+#include "directory/StockDirectory.h"
+
 namespace fs = std::filesystem;
 
 // ------------------------------------------------------------
@@ -28,6 +32,8 @@ int main()
     }
 
     MessageParser messageParser { std::move(inputFile) };
+    TradeBook tradeBook {};
+    StockDirectory stockDirectory {};
 
     try
     {
@@ -45,6 +51,7 @@ int main()
                 case MessageType::StockDirectoryMessage:
                 {
                     const auto msg = messageParser.parseStockDirectoryMessage(message);
+                    stockDirectory.insert(msg.stock, msg.header.stockLocate);
                     //printStockDirectoryMessage(msg);
                     break;
                 }
@@ -99,7 +106,8 @@ int main()
                 case MessageType::AddOrderMessage:
                 {
                     const auto msg = messageParser.parseAddOrderMessage(message);
-                    printAddOrderMessage(msg);
+                    //printAddOrderMessage(msg);
+                    stockDirectory.displayAllStocks();
                     break;
                 }
                 case MessageType::AddOrderMPIDMessage:
@@ -141,7 +149,8 @@ int main()
                 case MessageType::TradeMessage:
                 {
                     const auto msg = messageParser.parseTradeMessage(message);
-                   // printTradeMessage(msg);
+                    //tradeBook.addTrade(msg);
+                    //tradeBook.displayMostRecentTrade();
                     break;
                 }
                 case MessageType::CrossTradeMessage:
