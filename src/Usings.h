@@ -2,6 +2,8 @@
 
 #include <array>
 #include <cstdint>
+#include <string_view>
+#include <span>
 
 struct Symbol
 {
@@ -45,9 +47,13 @@ namespace tradebook
 
 namespace itch 
 {
+    using Bytes = std::span<const std::uint8_t>;
     using Timestamp = std::uint64_t;
     using StockLocate = std::uint16_t;
     using TrackingNumber = std::uint16_t;
+    using MatchNumber = std::uint64_t;
+    using Price = std::uint32_t;
+    using Shares = std::uint32_t;
     using String16 = std::array<char, 2>;
     using String32 = std::array<char, 4>;
     using String64 = std::array<char, 8>;

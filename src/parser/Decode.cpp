@@ -1,6 +1,8 @@
-#include "MarketDataParser.h"
+#include "Messages.h"
+#include "Decode.h"
 #include <cstring>
 #include <iostream>
+#include <bit>
 
 
 template <std::unsigned_integral T>
@@ -22,6 +24,7 @@ template <std::unsigned_integral T>
 // Reads the next length-prefixed ITCH message.
 // Returns false if EOF occurs cleanly before another message.
 // Throws if the length prefix or message is truncated.
+/*
 bool MessageParser::readNextMessage()
 {
     std::array<uint8_t, 2> lengthBuffer {};
@@ -40,6 +43,11 @@ bool MessageParser::readNextMessage()
         throw std::runtime_error("Invalid zero-length message");
     }
 
+    if (length > Constants::kMaxMessageLength)
+    {
+        throw std::runtime_error("Unparsable: Message length greater than allowable max message length");
+    }
+
     msgLength_ = static_cast<std::size_t>(length);
 
     // Read the message body. The prefix length includes the message
@@ -53,9 +61,9 @@ bool MessageParser::readNextMessage()
 
     return true;
 }
+*/
 
-
-SystemEventMessage MessageParser::parseSystemEventMessage(std::span<const std::uint8_t> message)
+SystemEventMessage decodeSystemEventMessage(itch::Bytes message)
 {
     SystemEventMessage result {};
 
@@ -67,9 +75,8 @@ SystemEventMessage MessageParser::parseSystemEventMessage(std::span<const std::u
     return result;
 }
 
-StockDirectoryMessage MessageParser::parseStockDirectoryMessage(std::span<const std::uint8_t> message)
+StockDirectoryMessage decodeStockDirectoryMessage(itch::Bytes message)
 {
-
     StockDirectoryMessage result {};
 
     result.header.timestamp = convertBLEndian48(message.data() + 5);
@@ -98,7 +105,7 @@ StockDirectoryMessage MessageParser::parseStockDirectoryMessage(std::span<const 
     return result;
 }
 
-StockTradingActionMessage MessageParser::parseStockTradingActionMessage(std::span<const std::uint8_t> message)
+StockTradingActionMessage decodeStockTradingActionMessage(itch::Bytes message)
 {
 
     StockTradingActionMessage result{};
@@ -118,7 +125,7 @@ StockTradingActionMessage MessageParser::parseStockTradingActionMessage(std::spa
     return result;
 }
 
-RegSHORestrictionMessage MessageParser::parseRegSHORestrictionMessage(std::span<const std::uint8_t> message)
+RegSHORestrictionMessage decodeRegSHORestrictionMessage(itch::Bytes message)
 {
     RegSHORestrictionMessage result{};
 
@@ -133,7 +140,7 @@ RegSHORestrictionMessage MessageParser::parseRegSHORestrictionMessage(std::span<
     return result;
 }
 
-MarketParticipantPositionMessage MessageParser::parseMarketParticipantPositionMessage(std::span<const std::uint8_t> message)
+MarketParticipantPositionMessage decodeMarketParticipantPositionMessage(itch::Bytes message)
 {
     MarketParticipantPositionMessage result{};
 
@@ -153,7 +160,7 @@ MarketParticipantPositionMessage MessageParser::parseMarketParticipantPositionMe
     return result;
 }
 
-MWCBDeclineLevelMessage MessageParser::parseMWCBDeclineLevelMessage(std::span<const std::uint8_t> message)
+MWCBDeclineLevelMessage decodeMWCBDeclineLevelMessage(itch::Bytes message)
 {
     MWCBDeclineLevelMessage result{};
 
@@ -167,7 +174,7 @@ MWCBDeclineLevelMessage MessageParser::parseMWCBDeclineLevelMessage(std::span<co
     return result;
 }
 
-MWCBStatusMessage MessageParser::parseMWCBStatusMessage(std::span<const std::uint8_t> message)
+MWCBStatusMessage decodeMWCBStatusMessage(itch::Bytes message)
 {
     MWCBStatusMessage result{};
 
@@ -179,7 +186,7 @@ MWCBStatusMessage MessageParser::parseMWCBStatusMessage(std::span<const std::uin
     return result;
 }
 
-IPOQuotingPeriodUpdateMessage MessageParser::parseIPOQuotingPeriodUpdateMessage(std::span<const std::uint8_t> message)
+IPOQuotingPeriodUpdateMessage decodeIPOQuotingPeriodUpdateMessage(itch::Bytes message)
 {
     IPOQuotingPeriodUpdateMessage result{};
 
@@ -189,14 +196,14 @@ IPOQuotingPeriodUpdateMessage MessageParser::parseIPOQuotingPeriodUpdateMessage(
 
     // Copy stock symbol
     std::copy_n(message.data() + 11, result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
-    result.ipoQuotationReleaseTime = convertBLEndian<std::uint32_t>(message.data() + 11);
+    result.ipoQuotationReleaseTime = convertBLEndian<std::uint32_t>(message.data() + 19);
     result.ipoQuotationReleaseQualifier = static_cast<char>(message[23]);
     result.ipoPrice = convertBLEndian<std::uint32_t>(message.data() + 24);
 
     return result;
 }
 
-LULDAuctionCollarMessage MessageParser::parseLULDAuctionCollarMessage(std::span<const std::uint8_t> message)
+LULDAuctionCollarMessage decodeLULDAuctionCollarMessage(itch::Bytes message)
 {
     LULDAuctionCollarMessage result{};
 
@@ -214,7 +221,7 @@ LULDAuctionCollarMessage MessageParser::parseLULDAuctionCollarMessage(std::span<
     return result;
 }
 
-OperationalHaltMessage MessageParser::parseOperationalHaltMessage(std::span<const std::uint8_t> message)
+OperationalHaltMessage decodeOperationalHaltMessage(itch::Bytes message)
 {
     OperationalHaltMessage result{};
 
@@ -230,7 +237,7 @@ OperationalHaltMessage MessageParser::parseOperationalHaltMessage(std::span<cons
     return result;
 }
 
-AddOrderMessage MessageParser::parseAddOrderMessage(std::span<const std::uint8_t> message)
+AddOrderMessage decodeAddOrderMessage(itch::Bytes message)
 {
     AddOrderMessage result{};
 
@@ -245,7 +252,7 @@ AddOrderMessage MessageParser::parseAddOrderMessage(std::span<const std::uint8_t
     return result;
 }
 
-AddOrderMPIDMessage MessageParser::parseAddOrderMPIDMessage(std::span<const std::uint8_t> message)
+AddOrderMPIDMessage decodeAddOrderMPIDMessage(itch::Bytes message)
 {
     AddOrderMPIDMessage result{};
 
@@ -263,7 +270,7 @@ AddOrderMPIDMessage MessageParser::parseAddOrderMPIDMessage(std::span<const std:
     return result;
 }
 
-OrderExecutedMessage MessageParser::parseOrderExecutedMessage(std::span<const std::uint8_t> message)
+OrderExecutedMessage decodeOrderExecutedMessage(itch::Bytes message)
 {
     OrderExecutedMessage result{};
 
@@ -277,7 +284,7 @@ OrderExecutedMessage MessageParser::parseOrderExecutedMessage(std::span<const st
     return result;
 }
 
-OrderExecutedWithPriceMessage MessageParser::parseOrderExecutedWithPriceMessage(std::span<const std::uint8_t> message)
+OrderExecutedWithPriceMessage decodeOrderExecutedWithPriceMessage(itch::Bytes message)
 {
     OrderExecutedWithPriceMessage result{};
 
@@ -293,7 +300,7 @@ OrderExecutedWithPriceMessage MessageParser::parseOrderExecutedWithPriceMessage(
     return result;
 }
 
-OrderCancelMessage MessageParser::parseOrderCancelMessage(std::span<const std::uint8_t> message)
+OrderCancelMessage decodeOrderCancelMessage(itch::Bytes message)
 {
     OrderCancelMessage result{};
 
@@ -306,7 +313,7 @@ OrderCancelMessage MessageParser::parseOrderCancelMessage(std::span<const std::u
     return result;
 }
 
-OrderDeleteMessage MessageParser::parseOrderDeleteMessage(std::span<const std::uint8_t> message)
+OrderDeleteMessage decodeOrderDeleteMessage(itch::Bytes message)
 {
     OrderDeleteMessage result{};
 
@@ -318,7 +325,7 @@ OrderDeleteMessage MessageParser::parseOrderDeleteMessage(std::span<const std::u
     return result;
 }
 
-OrderReplaceMessage MessageParser::parseOrderReplaceMessage(std::span<const std::uint8_t> message)
+OrderReplaceMessage decodeOrderReplaceMessage(itch::Bytes message)
 {
     OrderReplaceMessage result{};
 
@@ -333,7 +340,7 @@ OrderReplaceMessage MessageParser::parseOrderReplaceMessage(std::span<const std:
     return result;
 }
 
-TradeMessage MessageParser::parseTradeMessage(std::span<const std::uint8_t> message)
+TradeMessage decodeTradeMessage(itch::Bytes message)
 {
     TradeMessage result{};
 
@@ -352,7 +359,7 @@ TradeMessage MessageParser::parseTradeMessage(std::span<const std::uint8_t> mess
     return result;
 }
 
-CrossTradeMessage MessageParser::parseCrossTradeMessage(std::span<const std::uint8_t> message)
+CrossTradeMessage decodeCrossTradeMessage(itch::Bytes message)
 {
     CrossTradeMessage result{};
 
@@ -370,7 +377,7 @@ CrossTradeMessage MessageParser::parseCrossTradeMessage(std::span<const std::uin
     return result;
 }
 
-BrokenTradeMessage MessageParser::parseBrokenTradeMessage(std::span<const std::uint8_t> message)
+BrokenTradeMessage decodeBrokenTradeMessage(itch::Bytes message)
 {
     BrokenTradeMessage result{};
 
@@ -382,7 +389,7 @@ BrokenTradeMessage MessageParser::parseBrokenTradeMessage(std::span<const std::u
     return result;
 }
 
-NOIIMessage MessageParser::parseNOIIMessage(std::span<const std::uint8_t> message)
+NOIIMessage decodeNOIIMessage(itch::Bytes message)
 {
 
     NOIIMessage result{};
@@ -402,7 +409,7 @@ NOIIMessage MessageParser::parseNOIIMessage(std::span<const std::uint8_t> messag
     return result;
 }
 
-RetailPriceImprovementMessage MessageParser::parseRetailPriceImprovementMessage(std::span<const std::uint8_t> message)
+RetailPriceImprovementMessage decodeRetailPriceImprovementMessage(itch::Bytes message)
 {
 
     RetailPriceImprovementMessage result{};
@@ -415,7 +422,7 @@ RetailPriceImprovementMessage MessageParser::parseRetailPriceImprovementMessage(
     return result;
 }
 
-DirectListingCapitalRaiseMessage MessageParser::parseDirectListingCapitalRaiseMessage(std::span<const std::uint8_t> message)
+DirectListingCapitalRaiseMessage decodeDirectListingCapitalRaiseMessage(itch::Bytes message)
 {
     DirectListingCapitalRaiseMessage result{};
 
