@@ -2,6 +2,11 @@
 
 #include "../Usings.h"
 
+template <std::unsigned_integral T>
+[[nodiscard]] static T convertBLEndian(const std::uint8_t* p) noexcept;
+
+[[nodiscard]] static std::uint64_t convertBLEndian48(const std::uint8_t* p) noexcept;
+
 SystemEventMessage decodeSystemEventMessage(itch::Bytes message);
 
 StockDirectoryMessage decodeStockDirectoryMessage(itch::Bytes message);
