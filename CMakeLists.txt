@@ -16,10 +16,12 @@ add_executable(TradingSystem src/main.cpp
         src/tradebook/Trade.h
         src/tradebook/Tradebook.cpp
         src/tradebook/Tradebook.h
-        src/directory/StockDirectory.cpp
-        src/directory/StockDirectory.h
+        src/stockdirectory/StockDirectory.cpp
+        src/stockdirectory/StockDirectory.h
         src/marketstate/MarketState.cpp
         src/marketstate/MarketState.h
         src/Constants.h
         src/Usings.h
+        src/datasource/filesource/FileSource.cpp
+        src/datasource/filesource/FileSource.h
 )

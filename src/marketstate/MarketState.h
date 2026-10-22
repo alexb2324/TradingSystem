@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../directory/StockDirectory.h"
+#include "../stockdirectory/StockDirectory.h"
 #include "../tradebook/Tradebook.h"
 
 #include "../parser/Messages.h"
