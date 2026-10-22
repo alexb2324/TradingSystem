@@ -5,12 +5,12 @@
 #include "../parser/Messages.h"
 #include "../orderbook/Order.h"
 
-enum class TradeType : std::uint8_t
+enum class TradeType : char
 {
-	OrderExecuted,
-	OrderExecutedWithPrice,
-	Trade,
-	CrossTrade
+	OrderExecuted = 'O',
+	OrderExecutedWithPrice = 'P',
+	Trade = 'T',
+	CrossTrade = 'C'
 };
 
 struct Trade

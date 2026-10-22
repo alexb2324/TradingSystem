@@ -2,6 +2,8 @@
 
 #include <vector>
 #include <cstddef>
+#include <print>
+#include <utility>
 
 #include "Trade.h"
 #include "../Constants.h"
@@ -17,6 +19,18 @@ public:
     Tradebook& operator=(Tradebook&& other) = delete;
     ~Tradebook() = default;
 
+
+    void printTrade(const Trade& trade)
+    {
+        std::println("Trade type - {}, Timestamp - {}, Trade Number - {}, Shares - {}, Price - {}, stockLocate - {}",
+            static_cast<char>(trade.tradeType),
+            trade.timestamp,
+            trade.matchNumber,
+            trade.shares,
+            trade.price.priceOriginal,
+            trade.stockLocate);
+    }
+
     [[nodiscard]] Trade& lastTrade() { return tradeTape_.back(); }
     [[nodiscard]] std::size_t size() const noexcept { return tradeTape_.size(); }
     void addTrade(const Trade& trade) { tradeTape_.push_back(trade); }
@@ -24,7 +38,7 @@ public:
     template <typename... TradeArgs>
     void addTrade(TradeArgs&&... tradeArgs)
     {
-        tradeTape_.emplace_back(tradeArgs...);
+        tradeTape_.emplace_back(std::forward<TradeArgs>(tradeArgs)...);
     }
 
 

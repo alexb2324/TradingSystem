@@ -1,5 +1,6 @@
 #pragma once
 
+#include <print>
 #include "../Constants.h"
 #include "../Usings.h"
 
@@ -15,10 +16,17 @@ public:
 
     [[nodiscard]] std::size_t size() const noexcept { return directorySize_; }
 
+    void printStockEntry(const itch::StockLocate stockLocate)
+    {
+        std::println("Stock Locate - {}, Stock Symbol - {}", stockLocate, stockMapping_[stockLocate].displaySymbol());
+    }
+
+
     void insert(const Symbol& stock, const itch::StockLocate stockLocate)
     {
         stockMapping_[stockLocate] = stock;
         ++directorySize_;
+        printStockEntry(stockLocate);
     }
 
     [[nodiscard]] Symbol find(const itch::StockLocate stockLocate) const noexcept

@@ -16,14 +16,14 @@ public:
 	~MarketState() = default;
 
 	void onStockDirectory(const StockDirectoryMessage& message);
-	void onAddOrder(AddOrderMessage message);
-	void onAddOrderMPID(AddOrderMPIDMessage message);
-	void onOrderExecuted(OrderExecutedMessage message);
-	void onOrderExecutedWithPrice(OrderExecutedWithPriceMessage message);
-	void onOrderCancelled(OrderCancelMessage message);
+	void onAddOrder(const AddOrderMessage& message);
+	void onAddOrderMPID(const AddOrderMPIDMessage& message);
+	void onOrderExecuted(const OrderExecutedMessage& message);
+	void onOrderExecutedWithPrice(const OrderExecutedWithPriceMessage& message);
+	void onOrderCancelled(const OrderCancelMessage& message);
 	void onTrade(const TradeMessage& message);
-	void onCrossTrade(CrossTradeMessage message);
-	void onBrokenTrade(BrokenTradeMessage message);
+	void onCrossTrade(const CrossTradeMessage& message);
+	void onBrokenTrade(const BrokenTradeMessage& message);
 
 private:
 

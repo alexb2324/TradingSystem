@@ -7,7 +7,7 @@ Trade::Trade(const OrderExecutedMessage& message, const Order* order) :
     price { order->getPrice() },
     shares { message.executedShares },
     stockLocate { message.header.stockLocate },
-    symbol { message.stock },
+    symbol { "AAA" },
     tradeType { TradeType::OrderExecuted },
     crossType {},
     side { 'B' }
@@ -19,7 +19,7 @@ Trade::Trade(const OrderExecutedWithPriceMessage& message, const Order* order) :
     price { order->getPrice() },
     shares { message.executedShares },
     stockLocate { message.header.stockLocate },
-    symbol { message.stock },
+    symbol { "AAA" },
     tradeType { TradeType::OrderExecutedWithPrice },
     crossType {},
     side { 'B' }
