@@ -3,13 +3,11 @@
 #include <vector>
 #include <cstddef>
 
-#include "../parser/Messages.h"
 #include "Trade.h"
 #include "../Constants.h"
 
 class Tradebook
 {
-
 public:
 
     Tradebook() { tradeTape_.reserve(Constants::kReserveDailyTradeCount); }
@@ -20,10 +18,16 @@ public:
     ~Tradebook() = default;
 
     [[nodiscard]] Trade& lastTrade() { return tradeTape_.back(); }
-
     [[nodiscard]] std::size_t size() const noexcept { return tradeTape_.size(); }
+    void addTrade(const Trade& trade) { tradeTape_.push_back(trade); }
+
+    template <typename... TradeArgs>
+    void addTrade(TradeArgs&&... tradeArgs)
+    {
+        tradeTape_.emplace_back(tradeArgs...);
+    }
 
 
 private:
-    std::vector<Trade> tradeTape_;
+    std::vector<Trade> tradeTape_ {};
 };

@@ -18,7 +18,7 @@ struct Symbol
 
 namespace orderbook
 {
-    using Price = std::uint64_t;
+    using Price = std::uint32_t;
     using Quantity = std::uint64_t;
     using OrderId = std::uint64_t;
 

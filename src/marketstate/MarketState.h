@@ -15,20 +15,20 @@ public:
 	MarketState& operator=(MarketState&& other) = delete;
 	~MarketState() = default;
 
-	void onStockDirectory(StockDirectoryMessage message);
+	void onStockDirectory(const StockDirectoryMessage& message);
 	void onAddOrder(AddOrderMessage message);
 	void onAddOrderMPID(AddOrderMPIDMessage message);
 	void onOrderExecuted(OrderExecutedMessage message);
 	void onOrderExecutedWithPrice(OrderExecutedWithPriceMessage message);
 	void onOrderCancelled(OrderCancelMessage message);
-	void onTrade(TradeMessage message);
+	void onTrade(const TradeMessage& message);
 	void onCrossTrade(CrossTradeMessage message);
 	void onBrokenTrade(BrokenTradeMessage message);
 
 private:
 
-	StockDirectory stockDirectory_;
-	Tradebook tradeBook_;
+	StockDirectory stockDirectory_ {};
+	Tradebook tradeBook_ {};
 	//Orderbook orderbook_;
 };
 

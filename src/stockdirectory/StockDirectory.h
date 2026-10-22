@@ -1,9 +1,7 @@
 #pragma once
-#include <print>
 
 #include "../Constants.h"
 #include "../Usings.h"
-
 
 class StockDirectory {
 
@@ -15,9 +13,13 @@ public:
     StockDirectory& operator=(StockDirectory&& other) = delete;
     ~StockDirectory() = default;
 
-    [[nodiscard]] std::size_t size() const noexcept { return stockMapping_.size(); }
+    [[nodiscard]] std::size_t size() const noexcept { return directorySize_; }
 
-    void insert(const Symbol& stock, const itch::StockLocate stockLocate) { stockMapping_[stockLocate] = stock; }
+    void insert(const Symbol& stock, const itch::StockLocate stockLocate)
+    {
+        stockMapping_[stockLocate] = stock;
+        ++directorySize_;
+    }
 
     [[nodiscard]] Symbol find(const itch::StockLocate stockLocate) const noexcept
     {
@@ -25,5 +27,6 @@ public:
     };
 
 private:
-    std::array<Symbol, Constants::kMaxStockDirectorySize> stockMapping_;
+    std::array<Symbol, Constants::kMaxStockDirectorySize> stockMapping_ {};
+    std::size_t directorySize_ {};
 };

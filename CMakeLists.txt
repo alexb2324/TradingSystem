@@ -24,4 +24,7 @@ add_executable(TradingSystem src/main.cpp
         src/Usings.h
         src/datasource/filesource/FileSource.cpp
         src/datasource/filesource/FileSource.h
+        src/tradebook/Trade.cpp
+        src/orderbook/Order.cpp
+        src/orderbook/Order.h
 )
