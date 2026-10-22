@@ -1,7 +1,9 @@
 #pragma once
 
 #include "../directory/StockDirectory.h"
-#include "../tradebook/TradeBook.h"
+#include "../tradebook/Tradebook.h"
+
+#include "../parser/Messages.h"
 
 class MarketState {
 
@@ -13,15 +15,21 @@ public:
 	MarketState& operator=(MarketState&& other) = delete;
 	~MarketState() = default;
 
-	void onStockDirectory();
-	void onAddOrder();
-	void onOrderExecuted();
+	void onStockDirectory(StockDirectoryMessage message);
+	void onAddOrder(AddOrderMessage message);
+	void onAddOrderMPID(AddOrderMPIDMessage message);
+	void onOrderExecuted(OrderExecutedMessage message);
+	void onOrderExecutedWithPrice(OrderExecutedWithPriceMessage message);
+	void onOrderCancelled(OrderCancelMessage message);
+	void onTrade(TradeMessage message);
+	void onCrossTrade(CrossTradeMessage message);
+	void onBrokenTrade(BrokenTradeMessage message);
 
 private:
 
 	StockDirectory stockDirectory_;
-	// MarketDataParser marketDataParser_;
-	TradeBook tradeBook_;
+	Tradebook tradeBook_;
+	//Orderbook orderbook_;
 };
 
 

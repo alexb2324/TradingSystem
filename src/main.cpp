@@ -1,21 +1,17 @@
 #include <cstdint>
 #include <cstddef>
 #include <fcntl.h>
-#include <fstream>
-#include <iostream>
-#include <iomanip>
 #include <stdexcept>
-#include <algorithm>
-#include <utility>
 #include <filesystem>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <print>
 
 #include "parser/Messages.h"
 #include "parser/Decode.h"
 
-#include "tradebook/TradeBook.h"
+#include "tradebook/Tradebook.h"
 
 #include "directory/StockDirectory.h"
 #include "parser/Dispatch.h"
@@ -59,169 +55,13 @@ int main()
 
     close(fd);
 
-    const auto* data = static_cast<const std::uint8_t*>(fileMapping);
+    std::span<const std::uint8_t> data {static_cast<const std::uint8_t*>(fileMapping), fileSize};
+    MarketState marketStateHandler {};
+    const auto parsedBytes = parseData(data, marketStateHandler);
 
-    TradeBook tradeBook {};
-    StockDirectory stockDirectory {};
-
-
-
-    while (readNextMessage(inputFile))
+    if (parsedBytes == fileSize)
     {
-        const auto message = messageParser.message();
-        switch (static_cast<MessageType>(message[0]))
-        {
-            case MessageType::SystemEventMessage:
-            {
-                const auto msg = messageParser.parseSystemEventMessage(message);
-                //printSystemEventMessage(msg);
-                break;
-            }
-            case MessageType::StockDirectoryMessage:
-            {
-                const auto msg = messageParser.parseStockDirectoryMessage(message);
-                stockDirectory.insert(msg.stock, msg.header.stockLocate);
-                //printStockDirectoryMessage(msg);
-                break;
-            }
-            case MessageType::StockTradingActionMessage:
-            {
-                const auto msg = messageParser.parseStockTradingActionMessage(message);
-                //printStockTradingActionMessage(msg);
-                break;
-            }
-            case MessageType::RegSHORestrictionMessage:
-            {
-                const auto msg = messageParser.parseRegSHORestrictionMessage(message);
-                //printRegSHORestrictionMessage(msg);
-                break;
-            }
-            case MessageType::MarketParticipantPositionMessage:
-            {
-                const auto msg = messageParser.parseMarketParticipantPositionMessage(message);
-                //printMarketParticipantPositionMessage(msg);
-                break;
-            }
-            case MessageType::MWCBDeclineLevelMessage:
-            {
-                const auto msg = messageParser.parseMWCBDeclineLevelMessage(message);
-                //printMWCBDeclineLevelMessage(msg);
-                break;
-            }
-            case MessageType::MWCBStatusMessage:
-            {
-                const auto msg = messageParser.parseMWCBStatusMessage(message);
-                //printMWCBStatusMessage(msg);
-                break;
-            }
-            case MessageType::IPOQuotingPeriodUpdateMessage:
-            {
-                const auto msg = messageParser.parseIPOQuotingPeriodUpdateMessage(message);
-                //printIPOQuotingPeriodUpdateMessage(msg);
-                break;
-            }
-            case MessageType::LULDAuctionCollarMessage:
-            {
-                const auto msg = messageParser.parseLULDAuctionCollarMessage(message);
-                //printLULDAuctionCollarMessage(msg);
-                break;
-            }
-            case MessageType::OperationalHaltMessage:
-            {
-                const auto msg = messageParser.parseOperationalHaltMessage(message);
-                //printOperationalHaltMessage(msg);
-                break;
-            }
-            case MessageType::AddOrderMessage:
-            {
-                const auto msg = messageParser.parseAddOrderMessage(message);
-                //printAddOrderMessage(msg);
-                break;
-            }
-            case MessageType::AddOrderMPIDMessage:
-            {
-                const auto msg = messageParser.parseAddOrderMPIDMessage(message);
-                //printAddOrderMPIDMessage(msg);
-                break;
-            }
-            case MessageType::OrderExecutedMessage:
-            {
-                const auto msg = messageParser.parseOrderExecutedMessage(message);
-                //printOrderExecutedMessage(msg);
-                tradeBook.addExecutedOrder(msg);
-                tradeBook.displayLastExecutedOrder();
-                break;
-            }
-            case MessageType::OrderExecutedWithPriceMessage:
-            {
-                const auto msg = messageParser.parseOrderExecutedWithPriceMessage(message);
-                //printOrderExecutedWithPriceMessage(msg);
-                tradeBook.addExecutedPriceOrder(msg);
-                tradeBook.displayLastExecutedPriceOrder();
-                break;
-            }
-            case MessageType::OrderCancelMessage:
-            {
-                const auto msg = messageParser.parseOrderCancelMessage(message);
-                //printOrderCancelMessage(msg);
-                break;
-            }
-            case MessageType::OrderDeleteMessage:
-            {
-                const auto msg = messageParser.parseOrderDeleteMessage(message);
-                //printOrderDeleteMessage(msg);
-                break;
-            }
-            case MessageType::OrderReplaceMessage:
-            {
-                const auto msg = messageParser.parseOrderReplaceMessage(message);
-               // printOrderReplaceMessage(msg);
-                break;
-            }
-            case MessageType::TradeMessage:
-            {
-                const auto msg = messageParser.parseTradeMessage(message);
-                tradeBook.addTrade(msg);
-                tradeBook.displayLastTrade();
-                break;
-            }
-            case MessageType::CrossTradeMessage:
-            {
-                const auto msg = messageParser.parseCrossTradeMessage(message);
-                tradeBook.addCrossTrade(msg);
-                tradeBook.displayLastCrossTrade();
-               // printCrossTradeMessage(msg);
-                break;
-            }
-            case MessageType::BrokenTradeMessage:
-            {
-                const auto msg = messageParser.parseBrokenTradeMessage(message);
-                tradeBook.addBrokenTrade(msg);
-                tradeBook.displayLastBrokenTrade();
-                //printBrokenTradeMessage(msg);
-                break;
-            }
-            case MessageType::NOIIMessage:
-            {
-                const auto msg = messageParser.parseNOIIMessage(message);
-               // printNOIIMessage(msg);
-                break;
-            }
-            case MessageType::RetailPriceImprovementMessage:
-            {
-                const auto msg = messageParser.parseRetailPriceImprovementMessage(message);
-                //printRetailPriceImprovementMessage(msg);
-                break;
-            }
-            case MessageType::DirectListingCapitalRaiseMessage:
-            {
-                const auto msg = messageParser.parseDirectListingCapitalRaiseMessage(message);
-               // printDirectListingCapitalRaiseMessage(msg);
-                break;
-            }
-            default:
-                throw std::runtime_error("Unknown message type");
-        }
+        std::println("Parsing finished");
     }
 
     if (munmap(fileMapping, fileSize) == -1)

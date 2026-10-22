@@ -7,17 +7,17 @@
 #include "Trade.h"
 #include "../Constants.h"
 
-class TradeBook 
+class Tradebook
 {
 
 public:
 
-    TradeBook() { tradeTape_.reserve(Constants::kReserveDailyTradeCount); }
-    TradeBook(const TradeBook& other) = delete;
-    TradeBook& operator=(const TradeBook& other) = delete;
-    TradeBook(TradeBook&& other) = delete;
-    TradeBook& operator=(TradeBook&& other) = delete;
-    ~TradeBook() = default;
+    Tradebook() { tradeTape_.reserve(Constants::kReserveDailyTradeCount); }
+    Tradebook(const Tradebook& other) = delete;
+    Tradebook& operator=(const Tradebook& other) = delete;
+    Tradebook(Tradebook&& other) = delete;
+    Tradebook& operator=(Tradebook&& other) = delete;
+    ~Tradebook() = default;
 
     [[nodiscard]] Trade& lastTrade() { return tradeTape_.back(); }
 

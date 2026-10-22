@@ -3,41 +3,136 @@
 
 #include "Dispatch.h"
 #include "Decode.h"
+#include "Messages.h"
+
 #include "../Constants.h"
+#include "../Usings.h"
 
-bool readNextMessage(std::ifstream& file)
+std::size_t parseData(const itch::Bytes data, MarketState& handler)
 {
-	std::array<uint8_t, 2> lengthBuffer {};
+    std::size_t readOffset {};
 
-	file.read(reinterpret_cast<char*>(lengthBuffer.data()), static_cast<std::streamsize>(lengthBuffer.size()));
+    while (readOffset + Constants::kItchMessageOffset <= data.size())
+    {
+        const auto msgLength = convertBLEndian<itch::MessageLength>(data.data() + readOffset);
 
-	const auto bytesRead = file.gcount();
+        if (readOffset + Constants::kItchMessageOffset + msgLength > data.size()) { break; }
+        if (msgLength == 0) { break; }
 
-	if (bytesRead == 0 && file.eof()) { return false; }
-	if (bytesRead != 2) { throw std::runtime_error("Truncated message length prefix"); }
+        dispatch(data.subspan(readOffset + Constants::kItchMessageOffset, msgLength), handler);
 
-	const auto length = convertBLEndian<std::uint16_t>(lengthBuffer.data());
+        readOffset += Constants::kItchMessageOffset + msgLength;
+    }
 
-	if (length == 0)
-	{
-		throw std::runtime_error("Invalid zero-length message");
-	}
+    return readOffset;
+}
 
-	if (length > Constants::kMaxMessageLength)
-	{
-		throw std::runtime_error("Unparsable: Message length greater than allowable max message length");
-	}
-
-	const auto msgLength = static_cast<std::size_t>(length);
-
-	// Read the message body. The prefix length includes the message
-	// type byte but does not include the two-byte prefix itself.
-	file.read(reinterpret_cast<char*>(messageBuffer_.data()), static_cast<std::streamsize>(msgLength));
-
-	if (file.gcount() != static_cast<std::streamsize>(msgLength))
-	{
-		throw std::runtime_error("Truncated message body");
-	}
-
-	return true;
+void dispatch(itch::Bytes message, MarketState& handler)
+{
+	switch (static_cast<MessageType>(message[0]))
+    {
+        case MessageType::SystemEventMessage:
+        {
+            break;
+        }
+        case MessageType::StockDirectoryMessage:
+        {
+            handler.onStockDirectory(decodeStockDirectoryMessage(message));
+            break;
+        }
+        case MessageType::StockTradingActionMessage:
+        {
+            break;
+        }
+        case MessageType::RegSHORestrictionMessage:
+        {
+            break;
+        }
+        case MessageType::MarketParticipantPositionMessage:
+        {
+            break;
+        }
+        case MessageType::MWCBDeclineLevelMessage:
+        {
+            break;
+        }
+        case MessageType::MWCBStatusMessage:
+        {
+            break;
+        }
+        case MessageType::IPOQuotingPeriodUpdateMessage:
+        {
+            break;
+        }
+        case MessageType::LULDAuctionCollarMessage:
+        {
+            break;
+        }
+        case MessageType::OperationalHaltMessage:
+        {
+            break;
+        }
+        case MessageType::AddOrderMessage:
+        {
+            handler.onAddOrder(decodeAddOrderMessage(message));
+            break;
+        }
+        case MessageType::AddOrderMPIDMessage:
+        {
+            handler.onAddOrderMPID(decodeAddOrderMPIDMessage(message));
+            break;
+        }
+        case MessageType::OrderExecutedMessage:
+        {
+            handler.onOrderExecuted(decodeOrderExecutedMessage(message));
+            break;
+        }
+        case MessageType::OrderExecutedWithPriceMessage:
+        {
+            handler.onOrderExecutedWithPrice(decodeOrderExecutedWithPriceMessage(message));
+            break;
+        }
+        case MessageType::OrderCancelMessage:
+        {
+            handler.onOrderCancelled(decodeOrderCancelMessage(message));
+            break;
+        }
+        case MessageType::OrderDeleteMessage:
+        {
+            break;
+        }
+        case MessageType::OrderReplaceMessage:
+        {
+            break;
+        }
+        case MessageType::TradeMessage:
+        {
+            handler.onTrade(decodeTradeMessage(message));
+            break;
+        }
+        case MessageType::CrossTradeMessage:
+        {
+            handler.onCrossTrade(decodeCrossTradeMessage(message));
+            break;
+        }
+        case MessageType::BrokenTradeMessage:
+        {
+            handler.onBrokenTrade(decodeBrokenTradeMessage(message));
+            break;
+        }
+        case MessageType::NOIIMessage:
+        {
+            break;
+        }
+        case MessageType::RetailPriceImprovementMessage:
+        {
+            break;
+        }
+        case MessageType::DirectListingCapitalRaiseMessage:
+        {
+            break;
+        }
+        default:
+            throw std::runtime_error("Unknown message type");
+    }
 }

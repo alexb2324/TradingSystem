@@ -1,34 +1,10 @@
 #include "Messages.h"
 #include "Decode.h"
-#include <cstring>
 #include <iostream>
-#include <bit>
+#include <algorithm>
 
 
-template <std::unsigned_integral T>
-[[nodiscard]] static T convertBLEndian(const std::uint8_t* p) noexcept
-{
-    T v;
-    std::memcpy(&v, p, sizeof(T));
-    return std::byteswap(v);
-}
-
-[[nodiscard]] static std::uint64_t convertBLEndian48(const std::uint8_t* p) noexcept
-{
-    std::uint64_t v {};
-    std::memcpy(&v, p, 6);
-    return std::byteswap(v) >> 16;
-}
-
-
-// Reads the next length-prefixed ITCH message.
-// Returns false if EOF occurs cleanly before another message.
-// Throws if the length prefix or message is truncated.
-/*
-bool MessageParser::
-*/
-
-SystemEventMessage decodeSystemEventMessage(itch::Bytes message)
+SystemEventMessage decodeSystemEventMessage(const itch::Bytes message)
 {
     SystemEventMessage result {};
 
@@ -40,7 +16,7 @@ SystemEventMessage decodeSystemEventMessage(itch::Bytes message)
     return result;
 }
 
-StockDirectoryMessage decodeStockDirectoryMessage(itch::Bytes message)
+StockDirectoryMessage decodeStockDirectoryMessage(const itch::Bytes message)
 {
     StockDirectoryMessage result {};
 
@@ -70,7 +46,7 @@ StockDirectoryMessage decodeStockDirectoryMessage(itch::Bytes message)
     return result;
 }
 
-StockTradingActionMessage decodeStockTradingActionMessage(itch::Bytes message)
+StockTradingActionMessage decodeStockTradingActionMessage(const itch::Bytes message)
 {
 
     StockTradingActionMessage result{};
@@ -90,7 +66,7 @@ StockTradingActionMessage decodeStockTradingActionMessage(itch::Bytes message)
     return result;
 }
 
-RegSHORestrictionMessage decodeRegSHORestrictionMessage(itch::Bytes message)
+RegSHORestrictionMessage decodeRegSHORestrictionMessage(const itch::Bytes message)
 {
     RegSHORestrictionMessage result{};
 
@@ -105,7 +81,7 @@ RegSHORestrictionMessage decodeRegSHORestrictionMessage(itch::Bytes message)
     return result;
 }
 
-MarketParticipantPositionMessage decodeMarketParticipantPositionMessage(itch::Bytes message)
+MarketParticipantPositionMessage decodeMarketParticipantPositionMessage(const itch::Bytes message)
 {
     MarketParticipantPositionMessage result{};
 
@@ -125,7 +101,7 @@ MarketParticipantPositionMessage decodeMarketParticipantPositionMessage(itch::By
     return result;
 }
 
-MWCBDeclineLevelMessage decodeMWCBDeclineLevelMessage(itch::Bytes message)
+MWCBDeclineLevelMessage decodeMWCBDeclineLevelMessage(const itch::Bytes message)
 {
     MWCBDeclineLevelMessage result{};
 
@@ -151,7 +127,7 @@ MWCBStatusMessage decodeMWCBStatusMessage(itch::Bytes message)
     return result;
 }
 
-IPOQuotingPeriodUpdateMessage decodeIPOQuotingPeriodUpdateMessage(itch::Bytes message)
+IPOQuotingPeriodUpdateMessage decodeIPOQuotingPeriodUpdateMessage(const itch::Bytes message)
 {
     IPOQuotingPeriodUpdateMessage result{};
 
@@ -168,7 +144,7 @@ IPOQuotingPeriodUpdateMessage decodeIPOQuotingPeriodUpdateMessage(itch::Bytes me
     return result;
 }
 
-LULDAuctionCollarMessage decodeLULDAuctionCollarMessage(itch::Bytes message)
+LULDAuctionCollarMessage decodeLULDAuctionCollarMessage(const itch::Bytes message)
 {
     LULDAuctionCollarMessage result{};
 
@@ -186,7 +162,7 @@ LULDAuctionCollarMessage decodeLULDAuctionCollarMessage(itch::Bytes message)
     return result;
 }
 
-OperationalHaltMessage decodeOperationalHaltMessage(itch::Bytes message)
+OperationalHaltMessage decodeOperationalHaltMessage(const itch::Bytes message)
 {
     OperationalHaltMessage result{};
 
@@ -202,7 +178,7 @@ OperationalHaltMessage decodeOperationalHaltMessage(itch::Bytes message)
     return result;
 }
 
-AddOrderMessage decodeAddOrderMessage(itch::Bytes message)
+AddOrderMessage decodeAddOrderMessage(const itch::Bytes message)
 {
     AddOrderMessage result{};
 
@@ -217,7 +193,7 @@ AddOrderMessage decodeAddOrderMessage(itch::Bytes message)
     return result;
 }
 
-AddOrderMPIDMessage decodeAddOrderMPIDMessage(itch::Bytes message)
+AddOrderMPIDMessage decodeAddOrderMPIDMessage(const itch::Bytes message)
 {
     AddOrderMPIDMessage result{};
 
@@ -235,7 +211,7 @@ AddOrderMPIDMessage decodeAddOrderMPIDMessage(itch::Bytes message)
     return result;
 }
 
-OrderExecutedMessage decodeOrderExecutedMessage(itch::Bytes message)
+OrderExecutedMessage decodeOrderExecutedMessage(const itch::Bytes message)
 {
     OrderExecutedMessage result{};
 
@@ -249,7 +225,7 @@ OrderExecutedMessage decodeOrderExecutedMessage(itch::Bytes message)
     return result;
 }
 
-OrderExecutedWithPriceMessage decodeOrderExecutedWithPriceMessage(itch::Bytes message)
+OrderExecutedWithPriceMessage decodeOrderExecutedWithPriceMessage(const itch::Bytes message)
 {
     OrderExecutedWithPriceMessage result{};
 
@@ -265,7 +241,7 @@ OrderExecutedWithPriceMessage decodeOrderExecutedWithPriceMessage(itch::Bytes me
     return result;
 }
 
-OrderCancelMessage decodeOrderCancelMessage(itch::Bytes message)
+OrderCancelMessage decodeOrderCancelMessage(const itch::Bytes message)
 {
     OrderCancelMessage result{};
 
@@ -278,7 +254,7 @@ OrderCancelMessage decodeOrderCancelMessage(itch::Bytes message)
     return result;
 }
 
-OrderDeleteMessage decodeOrderDeleteMessage(itch::Bytes message)
+OrderDeleteMessage decodeOrderDeleteMessage(const itch::Bytes message)
 {
     OrderDeleteMessage result{};
 
@@ -290,7 +266,7 @@ OrderDeleteMessage decodeOrderDeleteMessage(itch::Bytes message)
     return result;
 }
 
-OrderReplaceMessage decodeOrderReplaceMessage(itch::Bytes message)
+OrderReplaceMessage decodeOrderReplaceMessage(const itch::Bytes message)
 {
     OrderReplaceMessage result{};
 
@@ -305,7 +281,7 @@ OrderReplaceMessage decodeOrderReplaceMessage(itch::Bytes message)
     return result;
 }
 
-TradeMessage decodeTradeMessage(itch::Bytes message)
+TradeMessage decodeTradeMessage(const itch::Bytes message)
 {
     TradeMessage result{};
 
@@ -324,7 +300,7 @@ TradeMessage decodeTradeMessage(itch::Bytes message)
     return result;
 }
 
-CrossTradeMessage decodeCrossTradeMessage(itch::Bytes message)
+CrossTradeMessage decodeCrossTradeMessage(const itch::Bytes message)
 {
     CrossTradeMessage result{};
 
@@ -342,7 +318,7 @@ CrossTradeMessage decodeCrossTradeMessage(itch::Bytes message)
     return result;
 }
 
-BrokenTradeMessage decodeBrokenTradeMessage(itch::Bytes message)
+BrokenTradeMessage decodeBrokenTradeMessage(const itch::Bytes message)
 {
     BrokenTradeMessage result{};
 
@@ -354,7 +330,7 @@ BrokenTradeMessage decodeBrokenTradeMessage(itch::Bytes message)
     return result;
 }
 
-NOIIMessage decodeNOIIMessage(itch::Bytes message)
+NOIIMessage decodeNOIIMessage(const itch::Bytes message)
 {
 
     NOIIMessage result{};
@@ -374,7 +350,7 @@ NOIIMessage decodeNOIIMessage(itch::Bytes message)
     return result;
 }
 
-RetailPriceImprovementMessage decodeRetailPriceImprovementMessage(itch::Bytes message)
+RetailPriceImprovementMessage decodeRetailPriceImprovementMessage(const itch::Bytes message)
 {
 
     RetailPriceImprovementMessage result{};
@@ -387,7 +363,7 @@ RetailPriceImprovementMessage decodeRetailPriceImprovementMessage(itch::Bytes me
     return result;
 }
 
-DirectListingCapitalRaiseMessage decodeDirectListingCapitalRaiseMessage(itch::Bytes message)
+DirectListingCapitalRaiseMessage decodeDirectListingCapitalRaiseMessage(const itch::Bytes message)
 {
     DirectListingCapitalRaiseMessage result{};
 

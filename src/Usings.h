@@ -11,7 +11,7 @@ struct Symbol
 
     [[nodiscard]] std::string_view displaySymbol() const
     {
-        std::string_view symbol {symbolPadded.data(), symbolPadded.size()};
+        const std::string_view symbol {symbolPadded.data(), symbolPadded.size()};
         return symbol.substr(0, symbol.find_last_not_of(' ') + 1);
     };
 };
@@ -47,6 +47,7 @@ namespace tradebook
 
 namespace itch 
 {
+    using MessageLength = std::uint16_t;
     using Bytes = std::span<const std::uint8_t>;
     using Timestamp = std::uint64_t;
     using StockLocate = std::uint16_t;

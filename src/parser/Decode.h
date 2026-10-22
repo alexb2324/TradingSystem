@@ -1,11 +1,25 @@
 #pragma once
 
 #include "../Usings.h"
+#include "Messages.h"
+#include <bit>
+#include <cstring>
+
 
 template <std::unsigned_integral T>
-[[nodiscard]] static T convertBLEndian(const std::uint8_t* p) noexcept;
+[[nodiscard]] static T convertBLEndian(const std::uint8_t* p) noexcept
+{
+    T v;
+    std::memcpy(&v, p, sizeof(T));
+    return std::byteswap(v);
+}
 
-[[nodiscard]] static std::uint64_t convertBLEndian48(const std::uint8_t* p) noexcept;
+[[nodiscard]] static std::uint64_t convertBLEndian48(const std::uint8_t* p) noexcept
+{
+    std::uint64_t v {};
+    std::memcpy(&v, p, 6);
+    return std::byteswap(v) >> 16;
+}
 
 SystemEventMessage decodeSystemEventMessage(itch::Bytes message);
 
@@ -35,29 +49,4 @@ NOIIMessage decodeNOIIMessage(itch::Bytes message);
 RetailPriceImprovementMessage decodeRetailPriceImprovementMessage(itch::Bytes message);
 DirectListingCapitalRaiseMessage decodeDirectListingCapitalRaiseMessage(itch::Bytes message);
 
-
-
-
-
-/*
-class MessageParser
-{
-public:
-    explicit MessageParser(std::ifstream&& inputFile)
-    : file_ {std::move(inputFile)}
-    {};
-
-    bool readNextMessage();
-    [[nodiscard]] std::span<const std::uint8_t> message() const
-    {
-        return {messageBuffer_.data(), msgLength_};
-    };
-
-private:
-    std::array<uint8_t, Constants::kMaxMessageLength> messageBuffer_ {};
-    std::ifstream file_;
-    uint64_t msgLength_ {};
-
-};
-*/
 
