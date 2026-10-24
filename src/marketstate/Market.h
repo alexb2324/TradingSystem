@@ -42,7 +42,7 @@ public:
         it->second.quantity -= quantity;
         const bool orderRemoved = it->second.quantity == 0;
 
-        books_[order.stockLocate].reduce(order.side, order.price, order.quantity, orderRemoved);
+        books_[order.stockLocate].reduce(order.side, order.price, quantity, orderRemoved);
         if (orderRemoved) { orderTable_.erase(it); }
 
         return order;

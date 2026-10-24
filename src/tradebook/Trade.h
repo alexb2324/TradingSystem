@@ -1,8 +1,6 @@
 #pragma once
 
-#include <cstdint>
 #include "../Usings.h"
-#include "../parser/Messages.h"
 
 enum class TradeType : char
 {

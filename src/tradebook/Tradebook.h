@@ -35,12 +35,14 @@ public:
     [[nodiscard]] std::size_t size() const noexcept { return tradeTape_.size(); }
     void recordTrade(const Trade& trade) { tradeTape_.push_back(trade); }
 
-    template <typename... TradeArgs>
-    void recordTrade(TradeArgs&&... tradeArgs)
+    Trade* findTrade(itch::MatchNumber matchNumber)
     {
-        tradeTape_.emplace_back(std::forward<TradeArgs>(tradeArgs)...);
+        for (auto it = tradeTape_.rbegin(); it != tradeTape_.rend(); ++it)
+        {
+            if (it->matchNumber == matchNumber) return &(*it);
+        }
+        return nullptr;
     }
-
 
 private:
     std::vector<Trade> tradeTape_ {};

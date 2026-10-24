@@ -1,6 +1,7 @@
 #include "MarketState.h"
 #include "../tradebook/Trade.h"
 
+// Message type R
 void MarketState::onStockDirectory(const StockDirectoryMessage& message)
 {
     stockDirectory_.insert(message.stock, message.header.stockLocate);
@@ -112,5 +113,8 @@ void MarketState::onCrossTrade(const CrossTradeMessage& message)
 
 void MarketState::onBrokenTrade(const BrokenTradeMessage& message)
 {
-
+    if (Trade* trade = tradeBook_.findTrade(message.matchNumber))
+    {
+        trade->broken = true;
+    }
 }
