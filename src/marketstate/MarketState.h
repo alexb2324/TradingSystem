@@ -2,6 +2,7 @@
 
 #include "../stockdirectory/StockDirectory.h"
 #include "../tradebook/Tradebook.h"
+#include "Market.h"
 
 #include "../parser/Messages.h"
 
@@ -29,6 +30,7 @@ private:
 
 	StockDirectory stockDirectory_ {};
 	Tradebook tradeBook_ {};
+	Market market_;
 	//Orderbook orderbook_;
 };
 

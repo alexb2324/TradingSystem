@@ -4,47 +4,47 @@
 Trade::Trade(const OrderExecutedMessage& message, const Order* order) :
     timestamp { message.header.timestamp },
     matchNumber { message.matchNumber },
-    price { order->getPrice() },
     shares { message.executedShares },
-    stockLocate { message.header.stockLocate },
     symbol { "AAA" },
+    price { order->price },
+    stockLocate { message.header.stockLocate },
     tradeType { TradeType::OrderExecuted },
-    crossType {},
-    side { 'B' }
+    side { 'B' },
+    crossType {}
 { }
 
 Trade::Trade(const OrderExecutedWithPriceMessage& message, const Order* order) :
     timestamp { message.header.timestamp },
     matchNumber { message.matchNumber },
-    price { order->getPrice() },
     shares { message.executedShares },
-    stockLocate { message.header.stockLocate },
     symbol { "AAA" },
+    price { message.executionPrice },
+    stockLocate { message.header.stockLocate },
     tradeType { TradeType::OrderExecutedWithPrice },
-    crossType {},
-    side { 'B' }
+    side { 'B' },
+    crossType {}
 { }
 
 Trade::Trade(const TradeMessage& message) :
     timestamp { message.header.timestamp },
     matchNumber { message.matchNumber },
-    price { message.price },
     shares { message.shares },
-    stockLocate { message.header.stockLocate },
     symbol { message.stock },
+    price { message.price },
+    stockLocate { message.header.stockLocate },
     tradeType { TradeType::Trade },
-    crossType {},
-    side { message.buySellIndicator }
+    side { message.buySellIndicator },
+    crossType {}
 { }
 
 Trade::Trade(const CrossTradeMessage& message) :
     timestamp { message.header.timestamp },
     matchNumber { message.matchNumber },
-    price { message.crossPrice },
     shares { message.shares },
-    stockLocate { message.header.stockLocate },
     symbol { message.stock },
+    price { message.crossPrice },
+    stockLocate { message.header.stockLocate },
     tradeType { TradeType::CrossTrade },
-    crossType{ message.crossType },
-    side {}
+    side {},
+    crossType{ message.crossType }
 { }

@@ -7,11 +7,10 @@
 #include <stdexcept>
 #include <system_error>
 
-
-FileSource::FileSource(const std::string_view filePath)
+FileSource::FileSource(const std::filesystem::path& filePath)
 :   mapping_ { MAP_FAILED }, mappingSize_ {}
 {
-    const int fd = open(filePath.data(), O_RDONLY);
+    const int fd = open(filePath.c_str(), O_RDONLY);
 
     if (fd == -1)
     {
@@ -27,14 +26,13 @@ FileSource::FileSource(const std::string_view filePath)
         throw std::system_error(error, std::system_category(), "Failed to get file stats");
     }
 
-    const auto fileSize = static_cast<std::size_t>(fileInfo.st_size);
-
-    if (fileSize <= 0)
+    if (fileInfo.st_mode <= 0)
     {
         close(fd);
         throw std::runtime_error("Invalid file size");
     }
 
+    const auto fileSize = static_cast<std::size_t>(fileInfo.st_size);
     void* mapping = mmap(nullptr, fileSize, PROT_READ, MAP_PRIVATE, fd, 0);
 
     if (mapping == MAP_FAILED)

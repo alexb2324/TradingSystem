@@ -4,7 +4,6 @@
 #include "parser/Dispatch.h"
 #include "datasource/filesource/FileSource.h"
 
-namespace fs = std::filesystem;
 
 // ------------------------------------------------------------
 // Main
@@ -14,7 +13,9 @@ int main()
 {
 
     MarketState marketStateHandler {};
-    FileSource fileSource {"/home/hehexd2324/CLionProjects/TradingSystem/res/01302019.NASDAQ_ITCH50"};
+
+    std::filesystem::path filePath {"/home/hehexd2324/CLionProjects/TradingSystem/res/01302019.NASDAQ_ITCH50"};
+    FileSource fileSource { filePath };
     const auto data = fileSource.bytes();
 
     if (data.empty())
