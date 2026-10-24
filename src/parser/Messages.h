@@ -37,18 +37,6 @@ enum class MessageType : char
     DirectListingCapitalRaiseMessage = 'O'
 };
 
-
-struct Price
-{
-    std::uint32_t priceOriginal;
-
-    [[nodiscard]] double displayPrice() const
-    {
-        return static_cast<double>(priceOriginal) / 10'000.0;
-    }
-};
-
-
 struct Header
 {
     std::uint64_t timestamp;
@@ -224,7 +212,7 @@ struct OrderExecutedWithPriceMessage {
     std::uint64_t orderReferenceNumber;
     std::uint64_t matchNumber;
     std::uint32_t executedShares;
-    Price executionPrice;
+    std::uint32_t executionPrice;
     char printable;
 };
 
@@ -263,7 +251,7 @@ struct TradeMessage {
     std::uint64_t matchNumber{};
     Symbol stock{};
     std::uint32_t shares{};
-    Price price{};
+    std::uint32_t price{};
     Side buySellIndicator{};
 };
 
@@ -274,7 +262,7 @@ struct CrossTradeMessage {
     std::uint64_t shares{};
     std::uint64_t matchNumber{};
     Symbol stock{};
-    Price crossPrice{};
+    std::uint32_t crossPrice{};
     char crossType{};
 };
 

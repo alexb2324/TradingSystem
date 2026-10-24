@@ -3,18 +3,17 @@
 #include <map>
 
 #include "../Usings.h"
-#include "OrderbookLevel.h"
 
 class Orderbook     // Per Stock: L2 Price Levels
 {
 public:
 
-    Orderbook();
+    Orderbook() = default;
     Orderbook(const Orderbook& other) = delete;
     void operator=(const Orderbook& other) = delete;
     Orderbook(Orderbook&& other) = delete;
     void operator=(Orderbook&& other) = delete;
-    ~Orderbook();
+    ~Orderbook() = default;
 
     void addOrder(orderbook::Side side, orderbook::Price price, orderbook::Quantity quantity)
     {
@@ -45,6 +44,7 @@ private:
     void reduceLevel(Map& orderbookSide, orderbook::Price price, orderbook::Quantity quantity, bool orderRemoved)
     {
         auto it = orderbookSide.find(price);
+        if (it == orderbookSide.end()) { return; }
 
         it->second.totalShares -= quantity;
         if (orderRemoved) { --it->second.orderCount; } // Only reduce on fully filled orders
@@ -52,6 +52,13 @@ private:
     }
 
 private:
-    std::map<orderbook::Price, OrderbookLevel> bids_;
-    std::map<orderbook::Price, OrderbookLevel> asks_;
+
+    struct OrderbookLevel // L2 Orderbook Level Information
+    {
+        std::uint64_t totalShares {};
+        std::uint32_t orderCount {};
+    };
+
+    std::map<orderbook::Price, OrderbookLevel, std::greater<>> bids_;
+    std::map<orderbook::Price, OrderbookLevel, std::less<>> asks_;
 };

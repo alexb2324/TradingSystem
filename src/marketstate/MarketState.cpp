@@ -6,6 +6,7 @@ void MarketState::onStockDirectory(const StockDirectoryMessage& message)
     stockDirectory_.insert(message.stock, message.header.stockLocate);
 }
 
+// Message type A
 void MarketState::onAddOrder(const AddOrderMessage& message)
 {
     market_.add(message.orderReferenceNumber,
@@ -15,6 +16,7 @@ void MarketState::onAddOrder(const AddOrderMessage& message)
         message.header.stockLocate);
 }
 
+// Message type F
 void MarketState::onAddOrderMPID(const AddOrderMPIDMessage& message)
 {
     market_.add(message.orderReferenceNumber,
@@ -24,60 +26,87 @@ void MarketState::onAddOrderMPID(const AddOrderMPIDMessage& message)
         message.header.stockLocate);
 }
 
+// Message type E
 void MarketState::onOrderExecuted(const OrderExecutedMessage& message)
 {
-    auto order = market_.reduce(message.orderReferenceNumber, message.executedShares);
-    tradeBook_.recordTrade(message.header.timestamp,
-        message.matchNumber,
-        message.executedShares,
-        order.price,
-        message.header.stockLocate,
-        TradeType::OrderExecuted,
-        order.side,
-        ' ');
+    const auto order = market_.reduce(message.orderReferenceNumber, message.executedShares);
+    tradeBook_.recordTrade( Trade {
+        .timestamp = message.header.timestamp,
+        .matchNumber = message.matchNumber,
+        .shares = message.executedShares,
+        .price = order.price,
+        .stockLocate = message.header.stockLocate,
+        .tradeType = TradeType::OrderExecuted,
+        .side = static_cast<char>(order.side)
+    });
 }
 
+// Message type C
 void MarketState::onOrderExecutedWithPrice(const OrderExecutedWithPriceMessage& message)
 {
-    auto order = market_.reduce(message.orderReferenceNumber, message.executedShares);
-    tradeBook_.recordTrade(message.header.timestamp,
-        message.matchNumber,
-        message.executedShares,
-        order.price,
-        message.header.stockLocate,
-        TradeType::OrderExecutedWithPrice,
-        order.side,
-        ' ');
+    const auto order = market_.reduce(message.orderReferenceNumber, message.executedShares);
+
+    if (message.printable != 'Y') { return; }
+
+    tradeBook_.recordTrade( Trade {
+        .timestamp = message.header.timestamp,
+        .matchNumber = message.matchNumber,
+        .shares = message.executedShares,
+        .price = message.executionPrice,
+        .stockLocate = message.header.stockLocate,
+        .tradeType = TradeType::OrderExecutedWithPrice,
+        .side = static_cast<char>(order.side)
+    });
 }
 
+// Message type X
 void MarketState::onOrderCancelled(const OrderCancelMessage& message)
 {
     market_.reduce(message.orderReferenceNumber, message.cancelledShares);
 }
 
-void MarketState::onTrade(const TradeMessage& message)
+// Message type X
+void MarketState::onOrderDelete(const OrderDeleteMessage& message)
 {
-    tradeBook_.recordTrade(message.header.timestamp,
-        message.matchNumber,
-        message.shares,
-        message.price,
-        message.header.stockLocate,
-        TradeType::Trade,
-        'B',
-        ' ');
-    tradeBook_.printTrade(tradeBook_.lastTrade());
+    market_.remove(message.orderReferenceNumber);
 }
 
+// Message type X
+void MarketState::onOrderReplace(const OrderReplaceMessage& message)
+{
+    market_.replace(message.originalOrderReferenceNumber,
+        message.newOrderReferenceNumber,
+        message.price,
+        message.shares);
+}
+
+// Message type P
+void MarketState::onTrade(const TradeMessage& message)
+{
+    tradeBook_.recordTrade( Trade {
+        .timestamp = message.header.timestamp,
+        .matchNumber = message.matchNumber,
+        .shares = message.shares,
+        .price = message.price,
+        .stockLocate = message.header.stockLocate,
+        .tradeType = TradeType::OrderExecutedWithPrice,
+        .side = static_cast<char>(message.buySellIndicator)
+    });
+    //tradeBook_.printTrade(tradeBook_.lastTrade());
+}
+
+// Message type Q
 void MarketState::onCrossTrade(const CrossTradeMessage& message)
 {
-    tradeBook_.recordTrade(message.header.timestamp,
-        message.matchNumber,
-        message.shares,
-        message.crossPrice,
-        message.header.stockLocate,
-        TradeType::Trade,
-        'B',
-        ' ');
+    tradeBook_.recordTrade( Trade {
+        .timestamp = message.header.timestamp,
+        .matchNumber = message.matchNumber,
+        .shares = message.shares,
+        .price = message.crossPrice,
+        .stockLocate = message.header.stockLocate,
+        .tradeType = TradeType::OrderExecutedWithPrice,
+        .crossType = message.crossType
+    });
     tradeBook_.printTrade(tradeBook_.lastTrade());
 }
 

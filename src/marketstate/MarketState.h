@@ -22,15 +22,17 @@ public:
 	void onOrderExecuted(const OrderExecutedMessage& message);
 	void onOrderExecutedWithPrice(const OrderExecutedWithPriceMessage& message);
 	void onOrderCancelled(const OrderCancelMessage& message);
+	void onOrderDelete(const OrderDeleteMessage& message);
+	void onOrderReplace(const OrderReplaceMessage& message);
 	void onTrade(const TradeMessage& message);
 	void onCrossTrade(const CrossTradeMessage& message);
 	void onBrokenTrade(const BrokenTradeMessage& message);
 
-private:
 
+private:
 	StockDirectory stockDirectory_ {};
 	Tradebook tradeBook_ {};
-	Market market_;
+	Market market_ {};
 };
 
 

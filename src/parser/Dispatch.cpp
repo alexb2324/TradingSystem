@@ -98,10 +98,12 @@ void dispatch(itch::Bytes message, MarketState& handler)
         }
         case MessageType::OrderDeleteMessage:
         {
+            handler.onOrderCancelled(decodeOrderCancelMessage(message));
             break;
         }
         case MessageType::OrderReplaceMessage:
         {
+            handler.onOrderCancelled(decodeOrderCancelMessage(message));
             break;
         }
         case MessageType::TradeMessage:

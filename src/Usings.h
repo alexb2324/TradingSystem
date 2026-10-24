@@ -19,7 +19,7 @@ struct Symbol
 namespace orderbook
 {
     using Price = std::uint32_t;
-    using Quantity = std::uint64_t;
+    using Quantity = std::uint32_t;
     using OrderId = std::uint64_t;
 
     enum class Side : char
@@ -31,7 +31,7 @@ namespace orderbook
 
 namespace tradebook
 {
-    using Price = std::uint64_t;
+    using Price = std::uint32_t;
     using Quantity = std::uint64_t;
     using OrderId = std::uint64_t;
     using TradeId = std::uint64_t;
@@ -54,7 +54,7 @@ namespace itch
     using TrackingNumber = std::uint16_t;
     using MatchNumber = std::uint64_t;
     using Price = std::uint32_t;
-    using Shares = std::uint32_t;
+    using Shares = std::uint64_t;
     using String16 = std::array<char, 2>;
     using String32 = std::array<char, 4>;
     using String64 = std::array<char, 8>;

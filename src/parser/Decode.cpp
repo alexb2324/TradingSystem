@@ -236,7 +236,7 @@ OrderExecutedWithPriceMessage decodeOrderExecutedWithPriceMessage(const itch::By
     result.executedShares = convertBLEndian<std::uint32_t>(message.data() + 19);
     result.matchNumber = convertBLEndian<std::uint64_t>(message.data() + 23);
     result.printable = static_cast<char>(message[31]);
-    result.executionPrice.priceOriginal = convertBLEndian<std::uint32_t>(message.data() + 32);
+    result.executionPrice = convertBLEndian<std::uint32_t>(message.data() + 32);
 
     return result;
 }
@@ -294,7 +294,7 @@ TradeMessage decodeTradeMessage(const itch::Bytes message)
 
     // Copy stock symbol
     std::copy_n(message.data() + 24, result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
-    result.price.priceOriginal = convertBLEndian<std::uint32_t>(message.data() + 32);
+    result.price = convertBLEndian<std::uint32_t>(message.data() + 32);
     result.matchNumber = convertBLEndian<std::uint64_t>(message.data() + 36);
 
     return result;
@@ -311,7 +311,7 @@ CrossTradeMessage decodeCrossTradeMessage(const itch::Bytes message)
     // Copy stock symbol
     std::copy_n(message.data() + 19, result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
     result.shares = convertBLEndian<std::uint64_t>(message.data() + 11);
-    result.crossPrice.priceOriginal = convertBLEndian<std::uint32_t>(message.data() + 27);
+    result.crossPrice = convertBLEndian<std::uint32_t>(message.data() + 27);
     result.matchNumber = convertBLEndian<std::uint64_t>(message.data() + 31);
     result.crossType = static_cast<char>(message[39]);
 

@@ -27,7 +27,7 @@ public:
             trade.timestamp,
             trade.matchNumber,
             trade.shares,
-            trade.price.priceOriginal,
+            trade.price,
             trade.stockLocate);
     }
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <unordered_map>
-#include <array>
+#include <vector>
 
 #include "../orderbook/Order.h"
 #include "../orderbook/Orderbook.h"
@@ -11,7 +11,11 @@
 
 class Market {
 public:
-    Market() { orderTable_.reserve(10'000'000u); }
+    Market() : books_ { Constants::kMaxStockDirectorySize }
+    {
+        orderTable_.reserve(10'000'000u);
+    }
+
     Market(const Market& other) = delete;
     Market& operator=(const Market& other) = delete;
     Market(Market&& other) = delete;
@@ -68,5 +72,5 @@ public:
 
 private:
     std::unordered_map<orderbook::OrderId, Order> orderTable_;
-    std::array<Orderbook, Constants::kMaxStockDirectorySize> books_;
+    std::vector<Orderbook> books_;
 };

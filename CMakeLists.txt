@@ -14,7 +14,6 @@ add_executable(TradingSystem src/main.cpp
         src/orderbook/Orderbook.cpp
         src/orderbook/Orderbook.h
         src/tradebook/Trade.h
-        src/tradebook/Tradebook.cpp
         src/tradebook/Tradebook.h
         src/stockdirectory/StockDirectory.cpp
         src/stockdirectory/StockDirectory.h
@@ -26,8 +25,6 @@ add_executable(TradingSystem src/main.cpp
         src/datasource/filesource/FileSource.h
         src/orderbook/Order.cpp
         src/orderbook/Order.h
-        src/orderbook/OrderbookLevel.cpp
-        src/orderbook/OrderbookLevel.h
         src/marketstate/Market.cpp
         src/marketstate/Market.h
 )
