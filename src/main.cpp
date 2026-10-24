@@ -5,13 +5,8 @@
 #include "datasource/filesource/FileSource.h"
 
 
-// ------------------------------------------------------------
-// Main
-// ------------------------------------------------------------
-
 int main()
 {
-
     MarketState marketStateHandler {};
 
     std::filesystem::path filePath {"/home/hehexd2324/CLionProjects/TradingSystem/res/01302019.NASDAQ_ITCH50"};

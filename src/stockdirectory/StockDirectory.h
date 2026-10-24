@@ -1,6 +1,7 @@
 #pragma once
 
 #include <print>
+#include <optional>
 #include "../Constants.h"
 #include "../Usings.h"
 
@@ -33,6 +34,18 @@ public:
     {
         return stockMapping_[stockLocate];
     };
+
+    [[nodiscard]] std::optional<itch::StockLocate> findLocate(const std::string_view symbol) const noexcept
+    {
+        for (std::size_t i {}; i < stockMapping_.size(); ++i)
+        {
+            if (stockMapping_[i].displaySymbol() == symbol)
+            {
+                return static_cast<itch::StockLocate>(i);
+            }
+        }
+        return std::nullopt;
+    }
 
 private:
     std::array<Symbol, Constants::kMaxStockDirectorySize> stockMapping_ {};
