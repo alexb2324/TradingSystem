@@ -31,7 +31,6 @@ private:
 	StockDirectory stockDirectory_ {};
 	Tradebook tradeBook_ {};
 	Market market_;
-	//Orderbook orderbook_;
 };
 
 

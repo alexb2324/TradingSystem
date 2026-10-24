@@ -186,7 +186,7 @@ AddOrderMessage decodeAddOrderMessage(const itch::Bytes message)
     result.header.trackingNumber = convertBLEndian<std::uint16_t>(message.data() + 3);
     result.header.stockLocate = convertBLEndian<std::uint16_t>(message.data() + 1);
     result.orderReferenceNumber = convertBLEndian<std::uint64_t>(message.data() + 11);
-    result.bSIndicator = static_cast<char>(message[19]);
+    result.bSIndicator = static_cast<Side>(message[19]);
     result.shares = convertBLEndian<std::uint32_t>(message.data() + 20);
     result.price = convertBLEndian<std::uint32_t>(message.data() + 32);
 
@@ -201,7 +201,7 @@ AddOrderMPIDMessage decodeAddOrderMPIDMessage(const itch::Bytes message)
     result.header.trackingNumber = convertBLEndian<std::uint16_t>(message.data() + 3);
     result.header.stockLocate = convertBLEndian<std::uint16_t>(message.data() + 1);
     result.orderReferenceNumber = convertBLEndian<std::uint64_t>(message.data() + 11);
-    result.bSIndicator = static_cast<char>(message[19]);
+    result.bSIndicator = static_cast<Side>(message[19]);
     result.shares = convertBLEndian<std::uint32_t>(message.data() + 20);
     result.price = convertBLEndian<std::uint32_t>(message.data() + 32);
 
@@ -289,7 +289,7 @@ TradeMessage decodeTradeMessage(const itch::Bytes message)
     result.header.trackingNumber = convertBLEndian<std::uint16_t>(message.data() + 3);
     result.header.stockLocate = convertBLEndian<std::uint16_t>(message.data() + 1);
     result.orderReferenceNumber = convertBLEndian<std::uint64_t>(message.data() + 11);
-    result.buySellIndicator = static_cast<char>(message[19]);
+    result.buySellIndicator = static_cast<Side>(message[19]);
     result.shares = convertBLEndian<std::uint32_t>(message.data() + 20);
 
     // Copy stock symbol

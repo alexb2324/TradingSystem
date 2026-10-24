@@ -3,7 +3,6 @@
 #include <cstdint>
 #include "../Usings.h"
 #include "../parser/Messages.h"
-#include "../orderbook/Order.h"
 
 enum class TradeType : char
 {
@@ -15,15 +14,9 @@ enum class TradeType : char
 
 struct Trade
 {
-	Trade(const OrderExecutedMessage& message, const Order* order);
-	Trade(const OrderExecutedWithPriceMessage& message, const Order* order);
-	explicit Trade(const TradeMessage& message);
-	explicit Trade(const CrossTradeMessage& message);
-
 	itch::Timestamp timestamp;
 	itch::MatchNumber matchNumber;
 	std::uint64_t shares;
-	Symbol symbol;
 	Price price;
 	itch::StockLocate stockLocate;
 	TradeType tradeType;

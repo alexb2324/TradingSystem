@@ -22,10 +22,10 @@ namespace orderbook
     using Quantity = std::uint64_t;
     using OrderId = std::uint64_t;
 
-    enum class Side
+    enum class Side : char
     {
-        Buy,
-        Sell
+        Buy = 'B',
+        Sell = 'S'
     };
 }
 
@@ -37,10 +37,10 @@ namespace tradebook
     using TradeId = std::uint64_t;
     using Timestamp = std::uint64_t;
 
-    enum class Side
+    enum class Side : char
     {
-        Buy,
-        Sell
+        Buy = 'B',
+        Sell = 'S'
     };
 }
 

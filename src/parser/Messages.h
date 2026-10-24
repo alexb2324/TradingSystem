@@ -56,6 +56,11 @@ struct Header
     std::uint16_t trackingNumber;
 };
 
+enum class Side : char
+{
+    Buy = 'B',
+    Sell = 'S'
+};
 
 // ---------------------------------------------------
 // System Event
@@ -186,7 +191,7 @@ struct AddOrderMessage
     std::uint64_t orderReferenceNumber;
     std::uint32_t shares;
     std::uint32_t price;
-    char bSIndicator;
+    Side bSIndicator;
 };
 
 // Message type 'F', payload length: 40 bytes
@@ -198,7 +203,7 @@ struct AddOrderMPIDMessage
     std::uint32_t shares;
     std::uint32_t price;
     std::array<char, 4> attribution;
-    char bSIndicator;
+    Side bSIndicator;
 };
 
 // ---------------------------------------------------
@@ -259,7 +264,7 @@ struct TradeMessage {
     Symbol stock{};
     std::uint32_t shares{};
     Price price{};
-    char buySellIndicator{};
+    Side buySellIndicator{};
 };
 
 // Message type 'Q', payload length: 40 bytes

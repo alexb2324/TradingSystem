@@ -18,12 +18,12 @@ public:
 
     void addOrder(orderbook::Side side, orderbook::Price price, orderbook::Quantity quantity)
     {
-        side == orderbook::Side::Buy ? addOrderToLevel(bids_, price, quantity) : addOrderTo(asks_, price, quantity);
+        side == orderbook::Side::Buy ? addOrderToLevel(bids_, price, quantity) : addOrderToLevel(asks_, price, quantity);
     }
 
     void reduce(orderbook::Side side, orderbook::Price price, orderbook::Quantity quantity, bool orderRemoved)
     {
-        side == orderbook::Side::Buy ? reduceLevel(bids_, price, quantity, orderRemoved) : reduceIn(asks_, price, quantity, orderRemoved);
+        side == orderbook::Side::Buy ? reduceLevel(bids_, price, quantity, orderRemoved) : reduceLevel(asks_, price, quantity, orderRemoved);
     }
 
     [[nodiscard]] const auto& bids() const { return bids_; }

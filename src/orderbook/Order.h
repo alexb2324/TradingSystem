@@ -4,13 +4,15 @@
 
 struct Order
 {
-    Order(orderbook::Side side, orderbook::Price price, orderbook::Quantity quantity)
+    Order(orderbook::Quantity quantity, orderbook::Price price, orderbook::Side side, itch::StockLocate stockLocate)
         : quantity { quantity }
-        , side { side }
         , price { price }
+        , side { side }
+        , stockLocate { stockLocate }
     { }
 
     orderbook::Quantity quantity;
-    orderbook::Side side;
     orderbook::Price price;
+    orderbook::Side side;
+    itch::StockLocate stockLocate;
 };

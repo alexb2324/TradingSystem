@@ -33,10 +33,10 @@ public:
 
     [[nodiscard]] Trade& lastTrade() { return tradeTape_.back(); }
     [[nodiscard]] std::size_t size() const noexcept { return tradeTape_.size(); }
-    void addTrade(const Trade& trade) { tradeTape_.push_back(trade); }
+    void recordTrade(const Trade& trade) { tradeTape_.push_back(trade); }
 
     template <typename... TradeArgs>
-    void addTrade(TradeArgs&&... tradeArgs)
+    void recordTrade(TradeArgs&&... tradeArgs)
     {
         tradeTape_.emplace_back(std::forward<TradeArgs>(tradeArgs)...);
     }
