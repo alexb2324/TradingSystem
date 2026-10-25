@@ -1,15 +1,18 @@
 #include <filesystem>
 #include <print>
+#include <cstdio>
+
 
 #include "parser/Dispatch.h"
 #include "datasource/filesource/FileSource.h"
+#include "CountingHandler.h"
+#include "marketstate/MarketState.h"
 
 
 int main()
 {
-    MarketState marketStateHandler {};
 
-    std::filesystem::path filePath {"/home/hehexd2324/CLionProjects/TradingSystem/res/01302019.NASDAQ_ITCH50"};
+    std::filesystem::path filePath {"/Users/unknownuser/Desktop/Git/TradingSystem/res/01302019.NASDAQ_ITCH50"};
     FileSource fileSource { filePath };
     const auto data = fileSource.bytes();
 
@@ -19,7 +22,12 @@ int main()
         return 0;
     }
 
-    const auto parsedBytes = parseData(data, marketStateHandler);
+    CountingHandler counter {};
+    MarketState marketStateHandler {};
+
+
+    const auto parsedBytes = parseData(data, counter);
+    counter.report(stdout);
 
     if (parsedBytes == data.size())
     {
