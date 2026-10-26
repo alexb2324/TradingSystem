@@ -69,8 +69,11 @@ public:
     }
 
     const Orderbook& orderbook(const itch::StockLocate& stockLocate) const { return books_[stockLocate]; };
+    [[nodiscard]] std::size_t liveOrders() const { return orderTable_.size(); }
+    [[nodiscard]] std::size_t unknownOrders() const noexcept { return unknownOrders_; }
 
 private:
     std::unordered_map<orderbook::OrderId, Order> orderTable_;
     std::vector<Orderbook> books_;
+    std::size_t unknownOrders_ {};
 };

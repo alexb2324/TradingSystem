@@ -28,11 +28,20 @@ public:
 	void onCrossTrade(const CrossTradeMessage& message);
 	void onBrokenTrade(const BrokenTradeMessage& message);
 
+	void noteMessage(itch::Timestamp ts) noexcept { ++messages_; lastTimestamp_ = ts; }
+	[[nodiscard]] std::uint64_t   messageCount()  const noexcept { return messages_; }
+	[[nodiscard]] itch::Timestamp lastTimestamp() const noexcept { return lastTimestamp_; }
+
+	[[nodiscard]] const StockDirectory& stockDirectory() const noexcept { return stockDirectory_; }
+	[[nodiscard]] const Market& market() const noexcept { return market_; }
+	[[nodiscard]] const Tradebook& tradeBook() const noexcept { return tradeBook_; }
 
 private:
 	StockDirectory stockDirectory_ {};
 	Tradebook tradeBook_ {};
 	Market market_ {};
+	std::uint64_t messages_ {};
+	itch::Timestamp lastTimestamp_ {};
 };
 
 

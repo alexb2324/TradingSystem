@@ -44,6 +44,8 @@ public:
         return nullptr;
     }
 
+    [[nodiscard]] const std::vector<Trade>& trades() const { return tradeTape_; }
+
 private:
     std::vector<Trade> tradeTape_ {};
 };
