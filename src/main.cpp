@@ -14,6 +14,7 @@
 #include "marketstate/MarketState.h"
 
 
+/*
 int main(int argc, char* argv[])
 {
 
@@ -94,16 +95,37 @@ int main(int argc, char* argv[])
     std::println("\nDone: {}/{} bytes, unknown refs {}", offset, data.size(), marketState->market().unknownOrders());
 
     // Counter handling
-    /*
+
     CountingHandler counter {};
     const auto parsedBytes = parseData(data, counter);
     counter.report(stdout);
-    */
+
 
 
     return 0;
 }
+*/
 
+int main()
+{
+    std::filesystem::path filePath {"/Users/unknownuser/Desktop/Git/TradingSystem/res/01302019.NASDAQ_ITCH50"};
+    FileSource fileSource { filePath };
+    const auto data = fileSource.bytes();
+
+    if (data.empty())
+    {
+        std::println("File is empty");
+        return 0;
+    }
+
+    auto marketState = std::make_unique<MarketState>();
+    const auto parsedBytes = parseData(data, *marketState);
+
+    if (parsedBytes == data.size())
+    {
+        std::println("Parsing finished");
+    }
+}
 
 
 //"/Users/unknownuser/Desktop/Git/TradingSystem/res/01302019.NASDAQ_ITCH50"

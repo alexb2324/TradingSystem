@@ -31,4 +31,6 @@ add_executable(TradingSystem src/main.cpp
         src/console/CountingHandler.cpp
         src/console/ConsoleViewer.cpp
         src/console/ConsoleViewer.h
+        src/publisher/Snapshot.h
+        src/orderbook/OrderbookLevel.h
 )
