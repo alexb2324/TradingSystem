@@ -2,9 +2,7 @@
 
 #include <map>
 
-#include "OrderbookLevel.h"
 #include "../Usings.h"
-
 
 class Orderbook     // Per Stock: L2 Price Levels
 {
@@ -54,6 +52,12 @@ private:
     }
 
 private:
+
+    struct OrderbookLevel // L2 Orderbook Level Information
+    {
+        std::uint64_t totalShares {};
+        std::uint32_t orderCount {};
+    };
 
     std::map<orderbook::Price, OrderbookLevel, std::greater<>> bids_;
     std::map<orderbook::Price, OrderbookLevel, std::less<>> asks_;
