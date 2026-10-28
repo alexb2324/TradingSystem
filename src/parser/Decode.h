@@ -11,7 +11,15 @@ template <std::unsigned_integral T>
 {
     T v;
     std::memcpy(&v, p, sizeof(T));
-    return std::byteswap(v);
+    if constexpr (std::endian::native == std::endian::little) { v = std::byteswap(v); }
+    return v;
+}
+
+template <std::unsigned_integral T>
+void storeBigEndian(std::uint8_t* p, T v) noexcept
+{
+    if constexpr (std::endian::native == std::endian::little) { v = std::byteswap(v); }
+    std::memcpy(p, &v, sizeof(T));
 }
 
 [[nodiscard]] static std::uint64_t convertBLEndian48(const std::uint8_t* p) noexcept

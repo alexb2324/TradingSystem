@@ -12,8 +12,12 @@
 #include "datasource/filesource/FileSource.h"
 #include "console/CountingHandler.h"
 #include "marketstate/MarketState.h"
+#include "replay/MessageSource.h"
+#include "replay/MoldEncoder.h"
 
 
+// Console viewer
+/*
 int main(int argc, char* argv[])
 {
 
@@ -94,16 +98,35 @@ int main(int argc, char* argv[])
     std::println("\nDone: {}/{} bytes, unknown refs {}", offset, data.size(), marketState->market().unknownOrders());
 
     // Counter handling
-    /*
+
     CountingHandler counter {};
     const auto parsedBytes = parseData(data, counter);
     counter.report(stdout);
-    */
+
 
 
     return 0;
 }
+*/
 
 
+int main()
+{
+    std::filesystem::path filePath {"/home/hehexd2324/CLionProjects/TradingSystem/res/01302019.NASDAQ_ITCH50"};
+
+    MessageSource fileSource { filePath };
+    const auto data = fileSource.bytes();
+
+    if (data.empty())
+    {
+        std::println("File is empty");
+        return 0;
+    }
+
+    MoldEncoder encoder;
+    const auto parsedData = parseRawMessage(data, encoder);
+
+}
 
 //"/Users/unknownuser/Desktop/Git/TradingSystem/res/01302019.NASDAQ_ITCH50"
+//home/hehexd2324/CLionProjects/TradingSystem/res/01302019.NASDAQ_ITCH50
