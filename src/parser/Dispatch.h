@@ -27,25 +27,6 @@ std::size_t parseData(const itch::Bytes data, Handler& handler)
     return readOffset;
 }
 
-template <typename Handler>
-std::size_t parseRawMessage(const itch::Bytes data, Handler& handler)
-{
-    std::size_t readOffset {};
-
-    while (readOffset + Constants::kItchMessageOffset <= data.size())
-    {
-        const auto msgLength = convertBLEndian<itch::MessageLength>(data.data() + readOffset);
-
-        if (readOffset + Constants::kItchMessageOffset + msgLength > data.size()) { break; }
-        if (msgLength == 0) { break; }
-
-        dispatch(data.subspan(readOffset, msgLength + Constants::kItchMessageOffset), handler);
-
-        readOffset += Constants::kItchMessageOffset + msgLength;
-    }
-
-    return readOffset;
-}
 
 template <typename Handler>
 void dispatch(itch::Bytes message, Handler& handler)

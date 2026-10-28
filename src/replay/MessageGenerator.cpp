@@ -1,4 +1,4 @@
-#include "MessageSource.h"
+#include "MessageGenerator.h"
 
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include <system_error>
 
-MessageSource::MessageSource(const std::filesystem::path& filePath)
+MessageGenerator::MessageGenerator(const std::filesystem::path& filePath)
 :   mapping_ { MAP_FAILED }, mappingSize_ {}
 {
     const int fd = open(filePath.c_str(), O_RDONLY);
@@ -48,12 +48,12 @@ MessageSource::MessageSource(const std::filesystem::path& filePath)
     mappingSize_ = fileSize;
 }
 
-MessageSource::~MessageSource()
+MessageGenerator::~MessageGenerator()
 {
     if (mapping_ != MAP_FAILED) { munmap(mapping_, mappingSize_); }
 }
 
-std::span<const std::uint8_t> MessageSource::allBytes() const noexcept
+std::span<const std::uint8_t> MessageGenerator::allBytes() const noexcept
 {
     if (mapping_ == MAP_FAILED) { return {}; }
     return {static_cast<const std::uint8_t*>(mapping_), mappingSize_};

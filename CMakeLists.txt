@@ -31,4 +31,13 @@ add_executable(TradingSystem src/main.cpp
         src/console/CountingHandler.cpp
         src/console/ConsoleViewer.cpp
         src/console/ConsoleViewer.h
+        src/replay/MessageGenerator.cpp
+        src/replay/MessageGenerator.h
+        src/replay/MoldUDP64Encoder.cpp
+        src/replay/MoldUDP64Encoder.h
+        src/replay/Pacer.h
+        src/replay/UdpSender.h
+        src/replay/FeedSimulator.cpp
+        src/replay/FeedSimulator.h
+        src/replay/SimulatorConfigs.h
 )

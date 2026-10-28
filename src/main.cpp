@@ -12,8 +12,9 @@
 #include "datasource/filesource/FileSource.h"
 #include "console/CountingHandler.h"
 #include "marketstate/MarketState.h"
-#include "replay/MessageSource.h"
-#include "replay/MoldEncoder.h"
+#include "replay/FeedSimulator.h"
+#include "replay/MessageGenerator.h"
+#include "replay/MoldUDP64Encoder.h"
 
 
 // Console viewer
@@ -114,17 +115,17 @@ int main()
 {
     std::filesystem::path filePath {"/home/hehexd2324/CLionProjects/TradingSystem/res/01302019.NASDAQ_ITCH50"};
 
-    MessageSource fileSource { filePath };
-    const auto data = fileSource.bytes();
+    FeedSimulator simulation {filePath};
+    simulation.run();
 
-    if (data.empty())
-    {
-        std::println("File is empty");
-        return 0;
-    }
 
-    MoldEncoder encoder;
-    const auto parsedData = parseRawMessage(data, encoder);
+    //MOldUDP64Encoder encoder;
+    //UDPSender sender {messageSource, encoder};
+    //encoder.encode()
+    //messageSource.play(encoder);
+
+
+
 
 }
 
