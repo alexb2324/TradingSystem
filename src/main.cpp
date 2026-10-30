@@ -123,8 +123,8 @@ int main()
         return 1;
     }
 
-    //FeedSimulator simulation {filePath, "127.0.0.1", 6969};
-    //simulation.run();
+    FeedSimulator simulation {filePath, "127.0.0.1", 6969};
+    simulation.run();
 
 
     //MOldUDP64Encoder encoder;

@@ -26,8 +26,7 @@ public:
 
     [[nodiscard]] itch::Bytes finish() noexcept
     {
-        assert(messageCount_ == 0);
-        if (messageCount_ == 0) { }
+        assert(messageCount_ > 0);
         writePacketHeader();
         const itch::Bytes packet {packetBuffer_.data(), currentOffset_};
 

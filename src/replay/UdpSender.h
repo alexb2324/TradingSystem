@@ -25,7 +25,11 @@ public:
         std::memset(&destAddr_, 0, sizeof(destAddr_));
         destAddr_.sin_family = AF_INET;
         destAddr_.sin_port = htons(port);
-        inet_pton(AF_INET, address.c_str(), &destAddr_.sin_addr);
+        if (inet_pton(AF_INET, address.c_str(), &destAddr_.sin_addr) <= 0)
+        {
+            throw std::system_error(errno, std::system_category(), "Error occurred with address conversion");
+        }
+        std::println("Created UDP socket to address {}, on port {}", address, port);
     }
 
 

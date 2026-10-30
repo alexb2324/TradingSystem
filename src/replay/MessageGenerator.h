@@ -23,7 +23,10 @@ class MessageGenerator
 public:
     explicit MessageGenerator(itch::Bytes data)
         : fileData_ { data }
-    { }
+    {
+        decodeNextMessage();
+        if (!nextMessage_) { throw std::runtime_error("Not able to decode messages from source"); }
+    }
 
     void prepareNextMessage() noexcept
     {

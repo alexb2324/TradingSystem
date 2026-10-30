@@ -2,11 +2,16 @@
 
 #include <print>
 #include <string_view>
+#include <thread>
+#include <chrono>
 
 #include "MoldUDP64Encoder.h"
 #include "MessageGenerator.h"
 #include "UdpSender.h"
 #include "../datasource/filesource/FileSource.h"
+
+
+using namespace std::chrono_literals;
 
 class FeedSimulator
 {
@@ -23,16 +28,23 @@ public:
     void run()
     {
         std::println("Starting message parsing...");
+        std::this_thread::sleep_for(1s);
 
         while (const auto message = messageSource_.message())
         {
             if (!encoder_.tryAddMessage(message->bytes))
             {
                 const auto packet = encoder_.finish();
-                udpSender_.sendPacket(packet);
+                std::println("Finished creating packet!");
+                auto bytes = udpSender_.sendPacket(packet);
+                std::println("Sent a packet of {} bytes", bytes);
+                running_ = false;
+                break;
             }
             else { messageSource_.prepareNextMessage(); }
         }
+
+        if (!running_) { return; }
 
         if (!encoder_.empty())
         {
@@ -45,9 +57,9 @@ public:
     }
 
 private:
-
     FileSource fileSource_;
     MessageGenerator messageSource_;
     MoldUDP64Encoder encoder_;
     UdpSender udpSender_;
+    bool running_ { true };
 };
