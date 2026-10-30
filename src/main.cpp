@@ -115,7 +115,7 @@ int main()
 {
     std::filesystem::path filePath {"/home/hehexd2324/CLionProjects/TradingSystem/res/01302019.NASDAQ_ITCH50"};
 
-    FeedSimulator simulation {filePath};
+    FeedSimulator simulation {filePath, "127.0.0.1", 6969};
     simulation.run();
 
 

@@ -9,7 +9,7 @@ class MoldUDP64Encoder
 {
 
 public:
-     MoldUDP64Encoder() = default;
+    MoldUDP64Encoder() = default;
 
     [[nodiscard]] bool tryAddMessage(const itch::Bytes message)
     {
@@ -21,28 +21,34 @@ public:
         return true;
     }
 
-    void cleanup() noexcept
-    {
-        std::fill(packetBuffer_.begin(), packetBuffer_.end(), 0);
-        messageCount_ = 0;
-        currentOffset_ = 20;
-    }
-
-    [[nodiscard]] itch::Bytes finish()
+    [[nodiscard]] itch::Bytes finish() noexcept
     {
         writePacketHeader();
-        return packetBuffer_;
+        const itch::Bytes packet {packetBuffer_.data(), currentOffset_};
+
+        // Cleanup
+        packetSequenceNumber_ += messageCount_;
+        messageCount_ = 0;
+        currentOffset_ = 20;
+        return packet;
     }
+
+    [[nodiscard]] bool empty() const noexcept { return messageCount_ == 0; }
 
     [[nodiscard]] itch::Bytes heartBeat(const std::size_t nextSeqNumber)
     {
-        sequenceNumber_ = nextSeqNumber;
-        return finish();
+        packetSequenceNumber_ = nextSeqNumber;
+        messageCount_ = 0;
+        writePacketHeader();
+        return {packetBuffer_.data(), currentOffset_};;
     }
 
-    void updateSequenceNumber(const std::size_t seqNumber) { sequenceNumber_ = seqNumber; }
-
-    [[nodiscard]] itch::Bytes endOfSession();
+    [[nodiscard]] itch::Bytes endOfSession()
+    {
+        messageCount_ = 0xFFFF;
+        writePacketHeader();
+        return {packetBuffer_.data(), currentOffset_};
+    }
 
 
 private:
@@ -50,13 +56,13 @@ private:
     void writePacketHeader() noexcept
     {
         std::memcpy(packetBuffer_.data(), sessionId_.data(), sessionId_.size());
-        storeBigEndian(packetBuffer_.data() + 10, sequenceNumber_);
+        storeBigEndian(packetBuffer_.data() + 10, packetSequenceNumber_);
         storeBigEndian(packetBuffer_.data() + 18, messageCount_);
     }
 
     std::array<uint8_t, 1500> packetBuffer_ {};
     std::size_t currentOffset_ {20};
-    std::size_t sequenceNumber_ {};
+    std::size_t packetSequenceNumber_ {1};
     std::uint16_t messageCount_ {};
     std::array<std::uint8_t, 10> sessionId_ {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
 };
