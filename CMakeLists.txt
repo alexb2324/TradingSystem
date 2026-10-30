@@ -3,8 +3,7 @@ project(TradingSystem)
 
 set(CMAKE_CXX_STANDARD 23)
 
-add_executable(TradingSystem src/main.cpp
-        libs/nlohmann/json.hpp
+add_executable(OrderbookSystem src/main.cpp
         src/parser/Decode.cpp
         src/parser/Decode.h
         src/parser/Dispatch.cpp
@@ -31,21 +30,12 @@ add_executable(TradingSystem src/main.cpp
         src/console/CountingHandler.cpp
         src/console/ConsoleViewer.cpp
         src/console/ConsoleViewer.h
-        src/replay/MessageGenerator.cpp
-        src/replay/MessageGenerator.h
-        src/replay/MoldUDP64Encoder.cpp
-        src/replay/MoldUDP64Encoder.h
-        src/replay/Pacer.h
-        src/replay/UdpSender.h
-        src/replay/FeedSimulator.cpp
-        src/replay/FeedSimulator.h
-        src/replay/SimulatorConfigs.h
         src/feedhandler/FeedHandler.h
         src/feedhandler/UdpReceiver.h
         src/feedhandler/MoldUDP64Decoder.h
 )
 
-add_executable(FeedReplay src/main.cpp
+add_executable(FeedReplay src/replay/main.cpp
         src/replay/MessageGenerator.cpp
         src/replay/MessageGenerator.h
         src/replay/MoldUDP64Encoder.cpp
@@ -56,4 +46,5 @@ add_executable(FeedReplay src/main.cpp
         src/replay/FeedSimulator.h
         src/replay/SimulatorConfigs.h
         src/datasource/filesource/FileSource.cpp
-        src/datasource/filesource/FileSource.h)
+        src/datasource/filesource/FileSource.h
+)

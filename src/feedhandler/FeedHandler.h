@@ -2,7 +2,6 @@
 
 #include <thread>
 #include <print>
-#include <chrono>
 #include <array>
 
 #include "UdpReceiver.h"
@@ -35,6 +34,7 @@ public:
                 std::println("Waiting 1 sec to see if packet has arrived.");
                 std::this_thread::sleep_for(1s);
             }
+            running_ = false;
         }
     }
 

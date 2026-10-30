@@ -12,10 +12,8 @@
 #include "parser/Dispatch.h"
 #include "datasource/filesource/FileSource.h"
 #include "console/CountingHandler.h"
+#include "feedhandler/FeedHandler.h"
 #include "marketstate/MarketState.h"
-#include "replay/FeedSimulator.h"
-#include "replay/MessageGenerator.h"
-#include "replay/MoldUDP64Encoder.h"
 
 
 // Console viewer
@@ -110,21 +108,11 @@ int main(int argc, char* argv[])
     return 0;
 }
 */
-namespace fs = std::filesystem;
 
 int main()
 {
-    const std::filesystem::path filePath = std::filesystem::current_path().parent_path() / "res/01302019.NASDAQ_ITCH50";
-
-    std::println("ITCH file path: {}", filePath.string());
-
-    if (!fs::exists(filePath) || !fs::is_regular_file(filePath)) {
-        std::cerr << "Error: Path does not exist or is not a directory.\n";
-        return 1;
-    }
-
-    FeedSimulator simulation {filePath, "127.0.0.1", 6969};
-    simulation.run();
+    FeedHandler marketDataFeed {"127.0.0.1", 6969};
+    marketDataFeed.run();
 
 
     //MOldUDP64Encoder encoder;
