@@ -70,5 +70,5 @@ private:
     std::size_t currentOffset_ { Constants::kPacketHeaderLength };
     std::size_t packetSequenceNumber_ {1};
     std::uint16_t messageCount_ {};
-    std::array<std::uint8_t, 10> sessionId_ {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
+    std::array<char, 10> sessionId_ {'H', 'e', 'l', 'l', 'o', 'T', 'h', 'e', 'r', 'e'};
 };

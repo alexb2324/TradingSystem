@@ -13,10 +13,10 @@ class UdpSender
 {
 public:
     UdpSender(const std::string& address, const std::uint16_t port)
-    :   socketdfd_ { socket(AF_INET, SOCK_DGRAM, 0) }
+    :   socketfd_ { socket(AF_INET, SOCK_DGRAM, 0) }
     {
 
-        if (socketdfd_ == -1)
+        if (socketfd_ == -1)
         {
             throw std::system_error(errno, std::system_category(), "Failed to open socket");
         }
@@ -31,7 +31,7 @@ public:
 
     std::size_t sendPacket(itch::Bytes packet)
     {
-        const auto sentBytes = sendto(socketdfd_,
+        const auto sentBytes = sendto(socketfd_,
             packet.data(),
             packet.size(),
             0,
@@ -55,12 +55,12 @@ public:
 
     ~UdpSender()
     {
-        close(socketdfd_);
+        close(socketfd_);
     }
 
 
 private:
-    int socketdfd_;
+    int socketfd_;
     sockaddr_in destAddr_;
 };
 
