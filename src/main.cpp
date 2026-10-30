@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <thread>
 #include <chrono>
+#include <iostream>
 #include <optional>
 
 
@@ -109,23 +110,27 @@ int main(int argc, char* argv[])
     return 0;
 }
 */
-
+namespace fs = std::filesystem;
 
 int main()
 {
-    std::filesystem::path filePath {"/home/hehexd2324/CLionProjects/TradingSystem/res/01302019.NASDAQ_ITCH50"};
+    const std::filesystem::path filePath = std::filesystem::current_path().parent_path() / "res/01302019.NASDAQ_ITCH50";
 
-    FeedSimulator simulation {filePath, "127.0.0.1", 6969};
-    simulation.run();
+    std::println("ITCH file path: {}", filePath.string());
+
+    if (!fs::exists(filePath) || !fs::is_regular_file(filePath)) {
+        std::cerr << "Error: Path does not exist or is not a directory.\n";
+        return 1;
+    }
+
+    //FeedSimulator simulation {filePath, "127.0.0.1", 6969};
+    //simulation.run();
 
 
     //MOldUDP64Encoder encoder;
     //UDPSender sender {messageSource, encoder};
     //encoder.encode()
     //messageSource.play(encoder);
-
-
-
 
 }
 

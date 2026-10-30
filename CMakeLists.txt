@@ -44,3 +44,16 @@ add_executable(TradingSystem src/main.cpp
         src/feedhandler/UdpReceiver.h
         src/feedhandler/MoldUDP64Decoder.h
 )
+
+add_executable(FeedReplay src/main.cpp
+        src/replay/MessageGenerator.cpp
+        src/replay/MessageGenerator.h
+        src/replay/MoldUDP64Encoder.cpp
+        src/replay/MoldUDP64Encoder.h
+        src/replay/Pacer.h
+        src/replay/UdpSender.h
+        src/replay/FeedSimulator.cpp
+        src/replay/FeedSimulator.h
+        src/replay/SimulatorConfigs.h
+        src/datasource/filesource/FileSource.cpp
+        src/datasource/filesource/FileSource.h)
