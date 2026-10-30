@@ -39,6 +39,15 @@ public:
             close(socketfd_);
             throw std::system_error(errno, std::system_category(), "Failed to bind to socket");
         }
+
+        // Set timeout for socket
+        const timeval timeoutConfiguration = { 5, 0 }; // 5 seconds timeout
+
+        if (setsockopt(socketfd_, SOL_SOCKET, SO_RCVTIMEO, &timeoutConfiguration, sizeof(timeoutConfiguration)) == -1)
+        {
+            close(socketfd_);
+            throw std::system_error(errno, std::system_category(), "Failed to set socket settings");
+        }
     
         std::println("UDP Server listening on port {} ...", port);
     }
@@ -55,10 +64,10 @@ public:
             reinterpret_cast<sockaddr*>(&senderAddr_),
             &len);
 
+        if (receivedBytes == -1) { return std::nullopt; }
+
         std::println("Received {} bytes while listening", receivedBytes);
 
-        if (receivedBytes == -1) { return std::nullopt; }
-        
         return itch::Bytes { networkBuffer_.data(), static_cast<std::size_t>(receivedBytes) };
     }
 

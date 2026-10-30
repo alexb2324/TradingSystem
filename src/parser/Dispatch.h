@@ -45,6 +45,10 @@ void dispatch(itch::Bytes message, Handler& handler)
     {
         case MessageType::SystemEventMessage:
         {
+            if constexpr (requires (const SystemEventMessage& msg) { handler.onStockDirectory(msg); })
+            {
+                handler.onSystemEvent(decodeSystemEventMessage(message));
+            }
             break;
         }
         case MessageType::StockDirectoryMessage:

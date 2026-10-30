@@ -1,10 +1,66 @@
 #include "MarketState.h"
 #include "../tradebook/Trade.h"
+#include <print>
+
+
+// Message type S
+void MarketState::onSystemEvent(const SystemEventMessage& message)
+{
+    std::println("System Event");
+}
 
 // Message type R
 void MarketState::onStockDirectory(const StockDirectoryMessage& message)
 {
     stockDirectory_.insert(message.stock, message.header.stockLocate);
+}
+
+// Message type H
+void onStockTradingAction(const StockTradingActionMessage& message)
+{
+    std::println("Stock Trading Action");
+}
+
+// Message type Y
+void onRegSHORestriction(const RegSHORestrictionMessage& message)
+{
+    std::println("RegSHORestriction");
+}
+
+// Message type L
+void onMarketParticipantPosition(const MarketParticipantPositionMessage& message)
+{
+    std::println("Market Participant Position");
+}
+
+// Message type V
+void onMWCBDeclineLevel(const MWCBDeclineLevelMessage& message)
+{
+    std::println("MWCB Decline Level");
+}
+
+// Message type W
+void onMWCBStatus(const MWCBStatusMessage& message)
+{
+    std::println("MWCB Status");
+}
+
+// Message type K
+void onIPOQuotingPeriodUpdate(const IPOQuotingPeriodUpdateMessage& message)
+{
+    std::println("IPOQuotingPeriodUpdate");
+}
+
+// Message type J
+void onLULDAuctionCollar(const LULDAuctionCollarMessage& message)
+{
+    std::println("LULDAuction Collar");
+}
+
+// Message type h
+void onOperationalHalt(const OperationalHaltMessage& message)
+{
+    std::println("Operational halt");
 }
 
 // Message type A
@@ -111,10 +167,29 @@ void MarketState::onCrossTrade(const CrossTradeMessage& message)
     tradeBook_.printTrade(tradeBook_.lastTrade());
 }
 
+// Message type B
 void MarketState::onBrokenTrade(const BrokenTradeMessage& message)
 {
     if (Trade* trade = tradeBook_.findTrade(message.matchNumber))
     {
         trade->broken = true;
     }
+}
+
+// Message type I
+void onNOII(const NOIIMessage& message)
+{
+    std::println("NOII");
+}
+
+// Message type N
+void onRetailPriceImprovement(const RetailPriceImprovementMessage& message)
+{
+    std::println("RetailPriceImprovement");
+}
+
+// Message type O
+void onDirectListingCapitalRaise(const DirectListingCapitalRaiseMessage& message)
+{
+    std::println("DirectListingCapitalRaise");
 }

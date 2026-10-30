@@ -44,7 +44,6 @@ add_executable(FeedReplay src/replay/main.cpp
         src/replay/UdpSender.h
         src/replay/FeedSimulator.cpp
         src/replay/FeedSimulator.h
-        src/replay/SimulatorConfigs.h
         src/datasource/filesource/FileSource.cpp
         src/datasource/filesource/FileSource.h
 )
