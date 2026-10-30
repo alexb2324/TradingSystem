@@ -42,5 +42,5 @@ add_executable(TradingSystem src/main.cpp
         src/replay/SimulatorConfigs.h
         src/feedhandler/FeedHandler.h
         src/feedhandler/UdpReceiver.h
-        src/replay/MoldUDP64Decoder.h
+        src/feedhandler/MoldUDP64Decoder.h
 )

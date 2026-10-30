@@ -44,24 +44,21 @@ public:
         std::println("UDP Server listening on port {} ...", port);
     }
 
-    itch::Bytes receivePackets()
+    std::optional<itch::Bytes> receivePacket()
     {
         socklen_t len = sizeof(clientAddr_);
         
-        // 4. Receive data
+        // Receive packet
         const auto receivedBytes = recvfrom(socketfd_,
             networkBuffer_.data(),
             networkBuffer_.size(),
-            0, 
+            0,
             reinterpret_cast<sockaddr*>(&clientAddr_),
             &len);
+
+        if (receivedBytes == -1) { return std::nullopt; }
         
-        if (receivedBytes == -1) 
-        {
-            std::println("Error occurred while receiving data");
-            return {};
-        }
-        return {networkBuffer_.data(), static_cast<std::size_t>(receivedBytes)};
+        return itch::Bytes {networkBuffer_.data(), receivedBytes};
     }
 
     UdpReceiver(const UdpReceiver& other) = delete;
@@ -77,7 +74,7 @@ public:
 
 private:
     int socketfd_ {};
-    std::array<uint8_t, 65'536> networkBuffer_ {};
+    std::array<uint8_t, 1'500> networkBuffer_ {};
     sockaddr_in serverAddr_ {};
     sockaddr_in clientAddr_ {};
 };

@@ -58,7 +58,6 @@ public:
         close(socketfd_);
     }
 
-
 private:
     int socketfd_;
     sockaddr_in destAddr_;
