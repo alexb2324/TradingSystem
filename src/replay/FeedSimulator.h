@@ -24,13 +24,14 @@ public:
     {
         std::println("Starting message parsing...");
 
-        while (auto message = messageSource_.nextMessage())
+        while (const auto message = messageSource_.message())
         {
             if (!encoder_.tryAddMessage(message->bytes))
             {
                 const auto packet = encoder_.finish();
                 udpSender_.sendPacket(packet);
             }
+            else { messageSource_.prepareNextMessage(); }
         }
 
         if (!encoder_.empty())
@@ -39,7 +40,7 @@ public:
             udpSender_.sendPacket(packet);
         }
 
-        auto endSessionPacket = messageSource_;
+        const auto endSessionPacket = encoder_.endOfSession(123);
         udpSender_.sendPacket(endSessionPacket);
     }
 

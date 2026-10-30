@@ -25,23 +25,27 @@ public:
         : fileData_ { data }
     { }
 
-    std::optional<SourceMessage> nextMessage()
+    void prepareNextMessage() noexcept
     {
-        if (!decodeNextMessage()) { return std::nullopt; }
+        decodeNextMessage();
+    }
+
+    [[nodiscard]] std::optional<SourceMessage> message() const
+    {
         return nextMessage_;
     }
 
 
 private:
 
-    bool decodeNextMessage()
+    void decodeNextMessage() noexcept
     {
-        if (currentOffset_ + Constants::kItchMessageOffset > fileData_.size()) { return false; }
+        if (currentOffset_ + Constants::kItchMessageOffset > fileData_.size()) { return; }
 
         const auto msgLength = convertBLEndian<itch::MessageLength>(fileData_.data() + currentOffset_);
 
-        if (currentOffset_ + Constants::kItchMessageOffset + msgLength > fileData_.size()) { return false; }
-        if (msgLength == 0) { return false; }
+        if (currentOffset_ + Constants::kItchMessageOffset + msgLength > fileData_.size()) { return; }
+        if (msgLength == 0) { return; }
 
         nextMessage_ = {.bytes = fileData_.subspan(currentOffset_,  + msgLength),
             .timestamp = convertBLEndian48(fileData_.data() + currentOffset_ + Constants::kItchMessageOffset + 5),
@@ -49,13 +53,12 @@ private:
 
         currentOffset_ += Constants::kItchMessageOffset + msgLength;
         ++sequenceNumber_;
-
-        return true;
     }
+
 
 private:
     std::optional<SourceMessage> nextMessage_ {};
     itch::Bytes fileData_ {};
     std::size_t currentOffset_ {};
-    std::size_t sequenceNumber_ {1};
+    std::uint64_t sequenceNumber_ {1};
 };

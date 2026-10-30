@@ -39,11 +39,12 @@ public:
             sizeof(destAddr_)
         );
 
-        if (sentBytes == -1)
+        if (sentBytes < packet.size())
         {
-            std::println("Unable to send correctly");
+            std::println("Something went wrong while sending packets.");
             return 0uz;
         }
+
         return static_cast<std::size_t>(sentBytes);
     }
 

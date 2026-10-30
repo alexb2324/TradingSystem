@@ -27,8 +27,13 @@ public:
         // Setup server address struct 
         std::memset(&serverAddr_, 0, sizeof(serverAddr_));
         serverAddr_.sin_family = AF_INET; // IPv4
-        inet_pton(AF_INET, address.c_str(), &serverAddr_.sin_addr); // Bind to 127 exclusively
-        serverAddr_.sin_port = htons(port); 
+
+        if (inet_pton(AF_INET, address.c_str(), &serverAddr_.sin_addr) <= 0) // Bind to 127 exclusively
+        {
+            throw std::system_error(errno, std::system_category(), "Error occurred with address conversion");
+        }
+
+        serverAddr_.sin_port = htons(port);
 
         if (bind(socketfd_, reinterpret_cast<sockaddr*>(&serverAddr_), sizeof(serverAddr_)) == -1)
         {
@@ -46,7 +51,7 @@ public:
         // 4. Receive data
         const auto receivedBytes = recvfrom(socketfd_,
             networkBuffer_.data(),
-            sizeof(networkBuffer_) - 1,
+            networkBuffer_.size(),
             0, 
             reinterpret_cast<sockaddr*>(&clientAddr_),
             &len);
