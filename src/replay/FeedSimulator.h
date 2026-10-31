@@ -1,7 +1,6 @@
 #pragma once
 
 #include <print>
-#include <string_view>
 #include <thread>
 #include <chrono>
 
@@ -13,11 +12,11 @@
 
 using namespace std::chrono_literals;
 
-class feed_sim
+class FeedSimulator
 {
 
 public:
-    explicit feed_sim(const std::filesystem::path& filePath, const std::string& address, const std::uint16_t port)
+    explicit FeedSimulator(const std::filesystem::path& filePath, const std::string& address, const std::uint16_t port)
     :   fileSource_ { filePath },
         messageSource_ {fileSource_.bytes()},
         udpSender_ {address, port}
