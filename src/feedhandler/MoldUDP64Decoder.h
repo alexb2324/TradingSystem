@@ -33,15 +33,14 @@ struct DecodedPacket
     DecodedPacket packet {};
 
     std::memcpy(packet.session.data(), datagram.data(), 10);
-    packet.sequenceNumber = convertBLEndian<std::uint64_t>(datagram.data());
-    packet.messageCount = convertBLEndian<std::uint16_t>(datagram.data());
+    packet.sequenceNumber = convertBLEndian<std::uint64_t>(datagram.data() + 10);
+    packet.messageCount = convertBLEndian<std::uint16_t>(datagram.data() + 18);
 
     if (packet.messageCount == 0) { packet.packetType = PacketType::Heartbeat; return packet;}
     if (packet.messageCount == 65535) { packet.packetType = PacketType::EndOfSession; return packet;}
-    if (datagram.size() != Constants::kPacketHeaderLength + packet.messageCount) { return std::nullopt; }
 
     packet.packetType = PacketType::Data;
-    packet.bytes = datagram.subspan(Constants::kPacketHeaderLength, packet.messageCount);
+    packet.bytes = datagram.subspan(Constants::kPacketHeaderLength, datagram.size() - Constants::kPacketHeaderLength);
 
     return packet;
 }

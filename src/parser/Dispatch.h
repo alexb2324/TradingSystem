@@ -44,13 +44,11 @@ void dispatch(itch::Bytes message, Handler& handler)
 	switch (static_cast<MessageType>(message[0]))
     {
         case MessageType::SystemEventMessage:
-        {
-            if constexpr (requires (const SystemEventMessage& msg) { handler.onStockDirectory(msg); })
+            if constexpr (requires (const SystemEventMessage& msg) { handler.onSystemEvent(msg); })
             {
                 handler.onSystemEvent(decodeSystemEventMessage(message));
             }
             break;
-        }
         case MessageType::StockDirectoryMessage:
 	        if constexpr (requires (const StockDirectoryMessage& msg) { handler.onStockDirectory(msg); })
             {
@@ -58,37 +56,53 @@ void dispatch(itch::Bytes message, Handler& handler)
             }
 	        break;
         case MessageType::StockTradingActionMessage:
-        {
+            if constexpr (requires (const StockTradingActionMessage& msg) { handler.onStockTradingAction(msg); })
+            {
+                handler.onStockTradingAction(decodeStockTradingActionMessage(message));
+            }
             break;
-        }
         case MessageType::RegSHORestrictionMessage:
-        {
-            break;
-        }
-        case MessageType::MarketParticipantPositionMessage:
-        {
-            break;
-        }
+	        if constexpr (requires (const RegSHORestrictionMessage& msg) { handler.onRegSHORestriction(msg); })
+	        {
+	            handler.onRegSHORestriction(decodeRegSHORestrictionMessage(message));
+	        }
+	        break;
+	    case MessageType::MarketParticipantPositionMessage:
+			if constexpr (requires (const MarketParticipantPositionMessage& msg) { handler.onMarketParticipantPosition(msg); })
+			{
+				handler.onMarketParticipantPosition(decodeMarketParticipantPositionMessage(message));
+			}
+	        break;
         case MessageType::MWCBDeclineLevelMessage:
-        {
-            break;
-        }
+	        if constexpr (requires (const MWCBDeclineLevelMessage& msg) { handler.onMWCBDeclineLevel(msg); })
+	        {
+	            handler.onMWCBDeclineLevel(decodeMWCBDeclineLevelMessage(message));
+	        }
+	        break;
         case MessageType::MWCBStatusMessage:
-        {
-            break;
-        }
+	        if constexpr (requires (const MWCBStatusMessage& msg) { handler.onMWCBStatus(msg); })
+	        {
+	            handler.onMWCBStatus(decodeMWCBStatusMessage(message));
+	        }
+	        break;
         case MessageType::IPOQuotingPeriodUpdateMessage:
-        {
-            break;
-        }
+	        if constexpr (requires (const IPOQuotingPeriodUpdateMessage& msg) { handler.onIPOQuotingPeriodUpdate(msg); })
+	        {
+	            handler.onIPOQuotingPeriodUpdate(decodeIPOQuotingPeriodUpdateMessage(message));
+	        }
+	        break;
         case MessageType::LULDAuctionCollarMessage:
-        {
-            break;
-        }
+	        if constexpr (requires (const LULDAuctionCollarMessage& msg) { handler.onLULDAuctionCollar(msg); })
+	        {
+	            handler.onLULDAuctionCollar(decodeLULDAuctionCollarMessage(message));
+	        }
+	        break;
         case MessageType::OperationalHaltMessage:
-        {
-            break;
-        }
+			if constexpr (requires (const OperationalHaltMessage& msg) { handler.onOperationalHalt(msg); })
+			{
+				handler.onOperationalHalt(decodeOperationalHaltMessage(message));
+			}
+			break;
         case MessageType::AddOrderMessage:
 	        if constexpr (requires (const AddOrderMessage& msg) { handler.onAddOrder(msg); })
             {
@@ -150,17 +164,23 @@ void dispatch(itch::Bytes message, Handler& handler)
             }
 	        break;
         case MessageType::NOIIMessage:
-        {
-            break;
-        }
+			if constexpr (requires (const NOIIMessage& msg) { handler.onNOII(msg); })
+			{
+				handler.onNOII(decodeNOIIMessage(message));
+			}
+			break;
         case MessageType::RetailPriceImprovementMessage:
-        {
-            break;
-        }
+			if constexpr (requires (const RetailPriceImprovementMessage& msg) { handler.onRetailPriceImprovement(msg); })
+			{
+				handler.onRetailPriceImprovement(decodeRetailPriceImprovementMessage(message));
+			}
+			break;
         case MessageType::DirectListingCapitalRaiseMessage:
-        {
-            break;
-        }
+			if constexpr (requires (const DirectListingCapitalRaiseMessage& msg) { handler.onDirectListingCapitalRaise(msg); })
+			{
+				handler.onDirectListingCapitalRaise(decodeDirectListingCapitalRaiseMessage(message));
+			}
+			break;
         default:
             throw std::runtime_error("Unknown message type");
     }

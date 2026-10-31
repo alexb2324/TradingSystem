@@ -16,49 +16,49 @@ void MarketState::onStockDirectory(const StockDirectoryMessage& message)
 }
 
 // Message type H
-void onStockTradingAction(const StockTradingActionMessage& message)
+void MarketState::onStockTradingAction(const StockTradingActionMessage& message)
 {
     std::println("Stock Trading Action");
 }
 
 // Message type Y
-void onRegSHORestriction(const RegSHORestrictionMessage& message)
+void MarketState::onRegSHORestriction(const RegSHORestrictionMessage& message)
 {
     std::println("RegSHORestriction");
 }
 
 // Message type L
-void onMarketParticipantPosition(const MarketParticipantPositionMessage& message)
+void MarketState::onMarketParticipantPosition(const MarketParticipantPositionMessage& message)
 {
     std::println("Market Participant Position");
 }
 
 // Message type V
-void onMWCBDeclineLevel(const MWCBDeclineLevelMessage& message)
+void MarketState::onMWCBDeclineLevel(const MWCBDeclineLevelMessage& message)
 {
     std::println("MWCB Decline Level");
 }
 
 // Message type W
-void onMWCBStatus(const MWCBStatusMessage& message)
+void MarketState::onMWCBStatus(const MWCBStatusMessage& message)
 {
     std::println("MWCB Status");
 }
 
 // Message type K
-void onIPOQuotingPeriodUpdate(const IPOQuotingPeriodUpdateMessage& message)
+void MarketState::onIPOQuotingPeriodUpdate(const IPOQuotingPeriodUpdateMessage& message)
 {
     std::println("IPOQuotingPeriodUpdate");
 }
 
 // Message type J
-void onLULDAuctionCollar(const LULDAuctionCollarMessage& message)
+void MarketState::onLULDAuctionCollar(const LULDAuctionCollarMessage& message)
 {
     std::println("LULDAuction Collar");
 }
 
 // Message type h
-void onOperationalHalt(const OperationalHaltMessage& message)
+void MarketState::onOperationalHalt(const OperationalHaltMessage& message)
 {
     std::println("Operational halt");
 }
@@ -177,19 +177,19 @@ void MarketState::onBrokenTrade(const BrokenTradeMessage& message)
 }
 
 // Message type I
-void onNOII(const NOIIMessage& message)
+void MarketState::onNOII(const NOIIMessage& message)
 {
     std::println("NOII");
 }
 
 // Message type N
-void onRetailPriceImprovement(const RetailPriceImprovementMessage& message)
+void MarketState::onRetailPriceImprovement(const RetailPriceImprovementMessage& message)
 {
     std::println("RetailPriceImprovement");
 }
 
 // Message type O
-void onDirectListingCapitalRaise(const DirectListingCapitalRaiseMessage& message)
+void MarketState::onDirectListingCapitalRaise(const DirectListingCapitalRaiseMessage& message)
 {
     std::println("DirectListingCapitalRaise");
 }

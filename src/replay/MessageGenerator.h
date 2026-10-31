@@ -50,7 +50,7 @@ private:
         if (currentOffset_ + Constants::kItchMessageOffset + msgLength > fileData_.size()) { return; }
         if (msgLength == 0) { return; }
 
-        nextMessage_ = {.bytes = fileData_.subspan(currentOffset_,  + msgLength),
+        nextMessage_ = {.bytes = fileData_.subspan(currentOffset_, Constants::kItchMessageOffset + msgLength),
             .timestamp = convertBLEndian48(fileData_.data() + currentOffset_ + Constants::kItchMessageOffset + 5),
             .sequenceNumber = sequenceNumber_};
 
