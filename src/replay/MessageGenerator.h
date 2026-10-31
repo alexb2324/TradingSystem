@@ -43,6 +43,8 @@ private:
 
     void decodeNextMessage() noexcept
     {
+        nextMessage_.reset();
+
         if (currentOffset_ + Constants::kItchMessageOffset > fileData_.size()) { return; }
 
         const auto msgLength = convertBLEndian<itch::MessageLength>(fileData_.data() + currentOffset_);

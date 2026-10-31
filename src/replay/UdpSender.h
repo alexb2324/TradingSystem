@@ -34,7 +34,7 @@ public:
     }
 
 
-    std::size_t sendPacket(itch::Bytes packet)
+    void sendPacket(itch::Bytes packet)
     {
         const auto sentBytes = sendto(socketfd_,
             packet.data(),
@@ -44,13 +44,12 @@ public:
             sizeof(destAddr_)
         );
 
-        if (sentBytes < packet.size())
+        if (sentBytes == -1)
         {
-            std::println("Something went wrong while sending packets.");
-            return 0uz;
+            throw std::system_error(errno, std::system_category(), "Something went wrong while sending packet.");
         }
 
-        return static_cast<std::size_t>(sentBytes);
+        sentBytes_ += static_cast<std::size_t>(sentBytes);
     }
 
     UdpSender(const UdpSender& other) = delete;
@@ -66,5 +65,6 @@ public:
 private:
     int socketfd_;
     sockaddr_in destAddr_;
+    std::size_t sentBytes_ {};
 };
 

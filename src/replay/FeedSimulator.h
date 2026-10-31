@@ -34,7 +34,6 @@ public:
             if (!encoder_.tryAddMessage(message->bytes))
             {
                 const auto packet = encoder_.finish();
-                std::println("Finished creating packet!");
                 auto bytes = udpSender_.sendPacket(packet);
                 std::println("Sent a packet of {} bytes", bytes);
                 running_ = false;
@@ -51,7 +50,7 @@ public:
             udpSender_.sendPacket(packet);
         }
 
-        const auto endSessionPacket = encoder_.endOfSession(123);
+        const auto endSessionPacket = encoder_.endOfSession(encoder_.nextSequenceNumber());
         udpSender_.sendPacket(endSessionPacket);
     }
 

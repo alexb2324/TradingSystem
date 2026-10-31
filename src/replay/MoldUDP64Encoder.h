@@ -38,6 +38,7 @@ public:
     }
 
     [[nodiscard]] bool empty() const noexcept { return messageCount_ == 0; }
+    [[nodiscard]] std::uint64_t nextSequenceNumber() const noexcept { return packetSequenceNumber_ + messageCount_; }
 
     [[nodiscard]] itch::Bytes heartBeat(const std::uint64_t nextSeqNumber) noexcept
     {
@@ -67,7 +68,7 @@ private:
 
     std::array<uint8_t, Constants::kPacketBufferSize> packetBuffer_ {};
     std::size_t currentOffset_ { Constants::kPacketHeaderLength };
-    std::size_t packetSequenceNumber_ {1};
+    std::uint64_t packetSequenceNumber_ {1};
     std::uint16_t messageCount_ {};
     std::array<char, Constants::kMoldSessionIdSize> sessionId_ {'H', 'e', 'l', 'l', 'o', 'T', 'h', 'e', 'r', 'e'};
 };
