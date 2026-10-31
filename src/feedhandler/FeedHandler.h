@@ -45,11 +45,15 @@ public:
 
         if (!decodedPacket) { return; }
 
-
-        if (!decodedPacket || decodedPacket->session != session_) { ++badPackets_; return; }
+        if (!decodedPacket || decodedPacket->session != session_) { ++invalidSessionPackets_; return; }
         if (decodedPacket->packetType == PacketType::EndOfSession) { running_ = false; return; }
 
-        sequenceNumber_ = decodedPacket->sequenceNumber;
+        if (expectedSequenceNumber_ < decodedPacket->sequenceNumber)
+        {
+            ++gaps_;
+            missedMessages_ += decodedPacket->sequenceNumber - expectedSequenceNumber_;
+            expectedSequenceNumber_ = decodedPacket->sequenceNumber; // Skip ahead for now
+        }
 
         if (decodedPacket->packetType == PacketType::Heartbeat) { return; }
 
@@ -64,7 +68,7 @@ public:
             dispatch(decodedPacket->bytes.subspan(readOffset + Constants::kItchMessageOffset, msgLength), *marketState_);
             readOffset += Constants::kItchMessageOffset + msgLength;
 
-            ++sequenceNumber_;
+            ++expectedSequenceNumber_;
         }
         processedBytes_ += readOffset;
     }
@@ -72,9 +76,11 @@ public:
 private:
     UdpReceiver receiver_;
     std::unique_ptr<MarketState> marketState_;
-    std::uint64_t sequenceNumber_ {};
+    std::uint64_t expectedSequenceNumber_ {1};
     std::array<char, Constants::kMoldSessionIdSize> session_ {'H', 'e', 'l', 'l', 'o', 'T', 'h', 'e', 'r', 'e'};
-    std::size_t badPackets_ {};
+    std::size_t invalidSessionPackets_ {};
+    std::size_t gaps_ {};
+    std::size_t missedMessages_ {};
     std::size_t processedBytes_ {};
     bool running_ { true };
 };

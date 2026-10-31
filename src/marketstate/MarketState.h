@@ -46,6 +46,7 @@ public:
 	void onDirectListingCapitalRaise(const DirectListingCapitalRaiseMessage& message);
 
 	void noteMessage(itch::Timestamp ts) noexcept { ++messages_; lastTimestamp_ = ts; }
+	void badMessage() noexcept { ++badMessages_; }
 	[[nodiscard]] std::uint64_t   messageCount()  const noexcept { return messages_; }
 	[[nodiscard]] itch::Timestamp lastTimestamp() const noexcept { return lastTimestamp_; }
 
@@ -58,6 +59,7 @@ private:
 	Tradebook tradeBook_ {};
 	Market market_ {};
 	std::uint64_t messages_ {};
+	std::size_t badMessages_ {};
 	itch::Timestamp lastTimestamp_ {};
 };
 
