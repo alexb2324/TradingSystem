@@ -13,11 +13,11 @@
 
 using namespace std::chrono_literals;
 
-class FeedSimulator
+class feed_sim
 {
 
 public:
-    explicit FeedSimulator(const std::filesystem::path& filePath, const std::string& address, const std::uint16_t port)
+    explicit feed_sim(const std::filesystem::path& filePath, const std::string& address, const std::uint16_t port)
     :   fileSource_ { filePath },
         messageSource_ {fileSource_.bytes()},
         udpSender_ {address, port}

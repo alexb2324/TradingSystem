@@ -3,7 +3,7 @@ project(TradingSystem)
 
 set(CMAKE_CXX_STANDARD 23)
 
-add_executable(OrderbookSystem src/main.cpp
+add_executable(OrderbookEngine src/apps/engine.cpp
         src/parser/Decode.cpp
         src/parser/Decode.h
         src/parser/Dispatch.cpp
@@ -35,14 +35,12 @@ add_executable(OrderbookSystem src/main.cpp
         src/feedhandler/MoldUDP64Decoder.h
 )
 
-add_executable(FeedReplay src/replay/main.cpp
-        src/replay/MessageGenerator.cpp
+add_executable(FeedReplay src/apps/feed_sim.cpp
         src/replay/MessageGenerator.h
         src/replay/MoldUDP64Encoder.cpp
         src/replay/MoldUDP64Encoder.h
         src/replay/Pacer.h
         src/replay/UdpSender.h
-        src/replay/FeedSimulator.cpp
         src/replay/FeedSimulator.h
         src/datasource/filesource/FileSource.cpp
         src/datasource/filesource/FileSource.h

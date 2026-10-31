@@ -13,7 +13,7 @@ class Market {
 public:
     Market() : books_ { Constants::kMaxStockDirectorySize }
     {
-        orderTable_.reserve(10'000'000u);
+        orderTable_.reserve(Constants::kReserveDailyOrderCount);
     }
 
     Market(const Market& other) = delete;
@@ -68,7 +68,7 @@ public:
         add(newOrderId, newPrice, newQuantity, prevOrder.side, prevOrder.stockLocate);
     }
 
-    const Orderbook& orderbook(const itch::StockLocate& stockLocate) const { return books_[stockLocate]; };
+    [[nodiscard]] const Orderbook& orderbook(const itch::StockLocate& stockLocate) const { return books_[stockLocate]; };
     [[nodiscard]] std::size_t liveOrders() const { return orderTable_.size(); }
     [[nodiscard]] std::size_t unknownOrders() const noexcept { return unknownOrders_; }
 

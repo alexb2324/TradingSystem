@@ -8,12 +8,12 @@
 #include <optional>
 
 
-#include "console/ConsoleViewer.h"
-#include "parser/Dispatch.h"
-#include "datasource/filesource/FileSource.h"
-#include "console/CountingHandler.h"
-#include "feedhandler/FeedHandler.h"
-#include "marketstate/MarketState.h"
+#include "../console/ConsoleViewer.h"
+#include "../parser/Dispatch.h"
+#include "../datasource/filesource/FileSource.h"
+#include "../console/CountingHandler.h"
+#include "../feedhandler/FeedHandler.h"
+#include "../marketstate/MarketState.h"
 
 
 // Console viewer

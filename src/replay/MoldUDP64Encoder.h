@@ -16,7 +16,7 @@ public:
 
     [[nodiscard]] bool tryAddMessage(const itch::Bytes message)
     {
-        if (currentOffset_ + message.size() > 1400) { return false; }
+        if (currentOffset_ + message.size() > Constants::kMaxPacketSize) { return false; }
         std::memcpy(packetBuffer_.data() + currentOffset_, message.data(), message.size());
         currentOffset_ += message.size();
         ++messageCount_;
@@ -50,7 +50,7 @@ public:
     [[nodiscard]] itch::Bytes endOfSession(const std::uint64_t nextSeqNumber) noexcept
     {
         packetSequenceNumber_ = nextSeqNumber;
-        messageCount_ = 0xFFFF;
+        messageCount_ = Constants::kHeartBeatMessageCount;
         writePacketHeader();
         return {packetBuffer_.data(), Constants::kPacketHeaderLength};
     }
@@ -65,9 +65,9 @@ private:
         storeBigEndian(packetBuffer_.data() + 18, messageCount_);
     }
 
-    std::array<uint8_t, 1500> packetBuffer_ {};
+    std::array<uint8_t, Constants::kPacketBufferSize> packetBuffer_ {};
     std::size_t currentOffset_ { Constants::kPacketHeaderLength };
     std::size_t packetSequenceNumber_ {1};
     std::uint16_t messageCount_ {};
-    std::array<char, 10> sessionId_ {'H', 'e', 'l', 'l', 'o', 'T', 'h', 'e', 'r', 'e'};
+    std::array<char, Constants::kMoldSessionIdSize> sessionId_ {'H', 'e', 'l', 'l', 'o', 'T', 'h', 'e', 'r', 'e'};
 };

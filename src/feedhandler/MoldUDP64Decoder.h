@@ -18,7 +18,7 @@ enum class PacketType : std::uint8_t
 
 struct DecodedPacket
 {
-    std::array<char, 10> session;
+    std::array<char, Constants::kMoldSessionIdSize> session;
     std::uint64_t sequenceNumber;
     std::uint16_t messageCount;
     PacketType packetType;
@@ -26,7 +26,7 @@ struct DecodedPacket
 };
 
 
-[[nodiscard]] std::optional<DecodedPacket> decodePacket(const itch::Bytes datagram)
+[[nodiscard]] inline std::optional<DecodedPacket> decodePacket(const itch::Bytes datagram)
 {
     if (datagram.size() < Constants::kPacketHeaderLength) { return std::nullopt; }
 
@@ -37,7 +37,7 @@ struct DecodedPacket
     packet.messageCount = convertBLEndian<std::uint16_t>(datagram.data() + 18);
 
     if (packet.messageCount == 0) { packet.packetType = PacketType::Heartbeat; return packet;}
-    if (packet.messageCount == 65535) { packet.packetType = PacketType::EndOfSession; return packet;}
+    if (packet.messageCount == Constants::kHeartBeatMessageCount) { packet.packetType = PacketType::EndOfSession; return packet;}
 
     packet.packetType = PacketType::Data;
     packet.bytes = datagram.subspan(Constants::kPacketHeaderLength, datagram.size() - Constants::kPacketHeaderLength);

@@ -29,6 +29,7 @@ public:
 
         if (inet_pton(AF_INET, address.c_str(), &receiverAddr_.sin_addr) <= 0) // Bind to 127 exclusively
         {
+            close(socketfd_);
             throw std::system_error(errno, std::system_category(), "Error occurred with address conversion");
         }
 
@@ -58,8 +59,8 @@ public:
         
         // Receive packet
         const auto receivedBytes = recvfrom(socketfd_,
-            networkBuffer_.data(),
-            networkBuffer_.size(),
+            packetBuffer_.data(),
+            packetBuffer_.size(),
             0,
             reinterpret_cast<sockaddr*>(&senderAddr_),
             &len);
@@ -68,7 +69,7 @@ public:
 
         std::println("Received {} bytes while listening", receivedBytes);
 
-        return itch::Bytes { networkBuffer_.data(), static_cast<std::size_t>(receivedBytes) };
+        return itch::Bytes { packetBuffer_.data(), static_cast<std::size_t>(receivedBytes) };
     }
 
     UdpReceiver(const UdpReceiver& other) = delete;
@@ -84,7 +85,7 @@ public:
 
 private:
     int socketfd_ {};
-    std::array<uint8_t, 1'500> networkBuffer_ {};
+    std::array<uint8_t, Constants::kPacketBufferSize> packetBuffer_ {};
     sockaddr_in receiverAddr_ {};
     sockaddr_in senderAddr_ {};
 };

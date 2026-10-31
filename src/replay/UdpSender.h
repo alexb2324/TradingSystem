@@ -27,6 +27,7 @@ public:
         destAddr_.sin_port = htons(port);
         if (inet_pton(AF_INET, address.c_str(), &destAddr_.sin_addr) <= 0)
         {
+            close(socketfd_);
             throw std::system_error(errno, std::system_category(), "Error occurred with address conversion");
         }
         std::println("Created UDP socket to address {}, on port {}", address, port);

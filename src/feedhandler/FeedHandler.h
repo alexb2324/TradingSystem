@@ -43,15 +43,15 @@ public:
     {
         const auto decodedPacket = decodePacket(packet);
 
-        if (!decodedPacket) { std::println("Undecoded Packet"); return; }
+        if (!decodedPacket) { return; }
 
 
-        if (!decodedPacket || decodedPacket->session != session_) { ++badPackets_; std::println("{}",badPackets_); return; }
-        if (decodedPacket->packetType == PacketType::EndOfSession) { running_ = false; std::println("EOS"); return; }
+        if (!decodedPacket || decodedPacket->session != session_) { ++badPackets_; return; }
+        if (decodedPacket->packetType == PacketType::EndOfSession) { running_ = false; return; }
 
         sequenceNumber_ = decodedPacket->sequenceNumber;
 
-        if (decodedPacket->packetType == PacketType::Heartbeat) { std::println("HB"); return; }
+        if (decodedPacket->packetType == PacketType::Heartbeat) { return; }
 
         std::size_t readOffset {};
         while (readOffset + Constants::kItchMessageOffset <= decodedPacket->bytes.size())
@@ -73,7 +73,7 @@ private:
     UdpReceiver receiver_;
     std::unique_ptr<MarketState> marketState_;
     std::uint64_t sequenceNumber_ {};
-    std::array<char, 10> session_ {'H', 'e', 'l', 'l', 'o', 'T', 'h', 'e', 'r', 'e'};
+    std::array<char, Constants::kMoldSessionIdSize> session_ {'H', 'e', 'l', 'l', 'o', 'T', 'h', 'e', 'r', 'e'};
     std::size_t badPackets_ {};
     std::size_t processedBytes_ {};
     bool running_ { true };

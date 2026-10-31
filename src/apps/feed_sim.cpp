@@ -4,7 +4,7 @@
 #include <chrono>
 #include <iostream>
 
-#include "FeedSimulator.h"
+#include "../replay/FeedSimulator.h"
 
 
 namespace fs = std::filesystem;
@@ -20,7 +20,7 @@ int main()
 		return 1;
 	}
 
-	FeedSimulator simulation {filePath, "127.0.0.1", 6969};
+	feed_sim simulation {filePath, "127.0.0.1", 6969};
 	simulation.run();
 
 }
