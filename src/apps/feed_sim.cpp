@@ -20,7 +20,7 @@ int main()
 		return 1;
 	}
 
-	feed_sim simulation {filePath, "127.0.0.1", 6969};
+	FeedSimulator simulation {filePath, "127.0.0.1", 6969};
 	simulation.run();
 
 }
