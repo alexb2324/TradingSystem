@@ -5,11 +5,12 @@
 #include <iostream>
 
 #include "../replay/FeedSimulator.h"
+#include "../replay/TimeUtil.h"
 
 
 namespace fs = std::filesystem;
 
-int main()
+int main(int argv, char* argc[])
 {
 	const std::filesystem::path filePath = std::filesystem::current_path().parent_path() / "res/01302019.NASDAQ_ITCH50";
 
@@ -20,7 +21,9 @@ int main()
 		return 1;
 	}
 
-	FeedSimulator simulation {filePath, "127.0.0.1", 6969};
-	simulation.run();
-
+	if (const auto startTime = parseTimeOfDay("09:30"); startTime)
+	{
+		FeedSimulator simulation {filePath, "127.0.0.1", 6969, *startTime};
+		simulation.run();
+	}
 }

@@ -17,10 +17,11 @@ class FeedSimulator
 {
 
 public:
-    FeedSimulator(const std::filesystem::path& filePath, const std::string& address, const std::uint16_t port)
+    FeedSimulator(const std::filesystem::path& filePath, const std::string& address, std::uint16_t port, std::uint64_t replayStartTime)
     :   fileSource_ { filePath },
-        messageSource_ {fileSource_.bytes()},
-        udpSender_ {address, port}
+        messageSource_ {fileSource_.bytes() },
+        udpSender_ {address, port},
+        pacer_ { replayStartTime }
     {
         std::println("Mapped file successfully.");
     }
@@ -32,29 +33,23 @@ public:
 
         while (const auto message = messageSource_.message())
         {
-            if (!pacer_.running()) [[unlikely]] { pacer_.startPacer(message->timestamp); }
-
-            if (auto dueTime = pacer_.dueAt(message->timestamp); dueTime >= std::chrono::steady_clock::now())
+            if (!pacer_.isDue(message->timestamp, std::chrono::steady_clock::now()))
             {
-                if (!encoder_.tryAddMessage(message->bytes))
-                {
-                    const auto packet = encoder_.finish();
-                    udpSender_.sendPacket(packet);
-                    std::println("Sent a packet of bytes");
-                }
-
-                messageSource_.prepareNextMessage();
-            }
-            else
-            {
-                const auto packet = encoder_.finish();
-                udpSender_.sendPacket(packet);
-                std::this_thread::sleep_until(dueTime);
+                if (!encoder_.empty()) { udpSender_.sendPacket(encoder_.finish()); }
+                std::this_thread::sleep_until(pacer_.dueAt(message->timestamp));
+                continue;
             }
 
+            if (!encoder_.tryAddMessage(message->bytes))
+            {
+                udpSender_.sendPacket(encoder_.finish());
+                continue;
+            }
+
+            messageSource_.prepareNextMessage();
         }
 
-        if (!running_) { return; }
+        //if (!running_) { return; }
 
         if (!encoder_.empty())
         {
@@ -70,7 +65,7 @@ private:
     FileSource fileSource_;
     MessageGenerator messageSource_;
     MoldUDP64Encoder encoder_;
-    Pacer pacer_ {};
+    Pacer pacer_;
     UdpSender udpSender_;
 
     bool running_ { true };

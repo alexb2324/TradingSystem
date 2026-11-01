@@ -44,4 +44,5 @@ add_executable(FeedReplay src/apps/feed_sim.cpp
         src/replay/FeedSimulator.h
         src/datasource/filesource/FileSource.cpp
         src/datasource/filesource/FileSource.h
+        src/replay/TimeUtil.h
 )

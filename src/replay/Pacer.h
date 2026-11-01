@@ -1,31 +1,43 @@
 #pragma once
 
 #include <chrono>
+#include <cstdint>
+
+using Timepoint = std::chrono::time_point<std::chrono::steady_clock>;
 
 class Pacer
 {
 public:
 
-	Pacer() = default;
+	explicit Pacer(std::uint64_t startTime)
+	:	startAt_ { startTime }
+	{ }
 
-	void startPacer(const std::uint64_t exchangeStartTime)
+	[[nodiscard]] Timepoint dueAt(const std::uint64_t nextTimestamp) const
 	{
-		exchangeStartTime_ = exchangeStartTime;
-		wallStartTime_ = std::chrono::steady_clock::now();
-		running_ = true;
-	}
-
-	[[nodiscard]] auto dueAt(const std::uint64_t nextTimestamp) const
-	{
-		const std::chrono::nanoseconds nextTimestampDur(nextTimestamp);
-		const std::chrono::nanoseconds exchangeStartDur(exchangeStartTime_);
+		const std::chrono::nanoseconds nextTimestampDur { nextTimestamp };
+		const std::chrono::nanoseconds exchangeStartDur { exchangeStartTime_ };
 		return wallStartTime_ + nextTimestampDur - exchangeStartDur;
 	}
 
-	[[nodiscard]] bool running() const noexcept { return running_; }
+	[[nodiscard]] bool isDue(const std::uint64_t timestamp, const Timepoint now) noexcept
+	{
+		if (timestamp < startAt_) { return true; } // Fast-forward to startAt_ time
+
+		if (!startPacer_) [[unlikely]]
+		{
+			exchangeStartTime_ = timestamp;
+			wallStartTime_ = now;
+			startPacer_ = true;
+			return true;
+		}
+
+		return wallStartTime_ + std::chrono::nanoseconds { timestamp } <= now;
+	}
 
 private:
-	std::uint64_t exchangeStartTime_;
-	std::chrono::time_point<std::chrono::steady_clock> wallStartTime_;
-	bool running_ { false };
+	std::uint64_t startAt_ {};
+	std::uint64_t exchangeStartTime_ {};
+	Timepoint wallStartTime_;
+	bool startPacer_ { false };
 };
