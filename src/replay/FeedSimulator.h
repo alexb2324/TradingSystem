@@ -3,13 +3,14 @@
 #include <print>
 #include <thread>
 #include <chrono>
+#include <cmath>
 
 #include "MoldUDP64Encoder.h"
 #include "MessageGenerator.h"
 #include "UdpSender.h"
 #include "Pacer.h"
 #include "../datasource/filesource/FileSource.h"
-
+#include "../console/Logger.h"
 
 using namespace std::chrono_literals;
 
@@ -59,6 +60,7 @@ public:
 
         const auto endSessionPacket = encoder_.endOfSession(encoder_.nextSequenceNumber());
         udpSender_.sendPacket(endSessionPacket);
+        std::println("Shutdown");
     }
 
 private:
@@ -67,6 +69,6 @@ private:
     MoldUDP64Encoder encoder_;
     Pacer pacer_;
     UdpSender udpSender_;
-
+    Logger logger_;
     bool running_ { true };
 };

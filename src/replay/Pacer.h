@@ -32,7 +32,7 @@ public:
 			return true;
 		}
 
-		return wallStartTime_ + std::chrono::nanoseconds { timestamp } <= now;
+		return dueAt(timestamp) <= now;
 	}
 
 private:

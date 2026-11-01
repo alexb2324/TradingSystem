@@ -56,7 +56,6 @@ public:
         return {packetBuffer_.data(), Constants::kPacketHeaderLength};
     }
 
-
 private:
 
     void writePacketHeader() noexcept
