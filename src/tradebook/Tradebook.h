@@ -35,7 +35,7 @@ public:
     [[nodiscard]] std::size_t size() const noexcept { return tradeTape_.size(); }
     void recordTrade(const Trade& trade) { tradeTape_.push_back(trade); }
 
-    Trade* findTrade(itch::MatchNumber matchNumber)
+    Trade* findTrade(const itch::MatchNumber matchNumber)
     {
         for (auto it = tradeTape_.rbegin(); it != tradeTape_.rend(); ++it)
         {

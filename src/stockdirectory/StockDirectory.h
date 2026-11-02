@@ -17,7 +17,7 @@ public:
 
     [[nodiscard]] std::size_t size() const noexcept { return directorySize_; }
 
-    void printStockEntry(const itch::StockLocate stockLocate)
+    void printStockEntry(const itch::StockLocate stockLocate) const
     {
         std::println("Stock Locate - {}, Stock Symbol - {}", stockLocate, stockMapping_[stockLocate].displaySymbol());
     }
@@ -27,7 +27,7 @@ public:
     {
         stockMapping_[stockLocate] = stock;
         ++directorySize_;
-        printStockEntry(stockLocate);
+        //printStockEntry(stockLocate);
     }
 
     [[nodiscard]] Symbol find(const itch::StockLocate stockLocate) const noexcept

@@ -40,7 +40,6 @@ struct DecodedPacket
     {
         packet.packetType = PacketType::Heartbeat;
         return packet;
-
     }
 
     if (packet.messageCount == Constants::kEOSMessageCount && datagram.size() == Constants::kPacketHeaderLength)

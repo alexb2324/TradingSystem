@@ -50,7 +50,7 @@ public:
         }
 
         // Set timeout for socket
-        if (setsockopt(socketfd_, SOL_SOCKET, SO_RCVTIMEO, &receivertimeoutConfig_, sizeof(receivertimeoutConfig_)) == -1)
+        if (setsockopt(socketfd_, SOL_SOCKET, SO_RCVTIMEO, &receiverTimeoutConfig_, sizeof(receiverTimeoutConfig_)) == -1)
         {
             close(socketfd_);
             throw std::system_error(errno, std::system_category(), "Failed to set socket settings");
@@ -103,6 +103,6 @@ private:
     int socketfd_ {};
     std::array<uint8_t, Constants::kPacketBufferSize> packetBuffer_ {};
     sockaddr_in receiverAddr_ {};
-    std::int32_t receiverBufferSize_ { 1'048'576 }; // Request 1 MB buffer to handle traffic
-    timeval receivertimeoutConfig_ = { 5, 0 }; // 5 seconds timeout
+    std::size_t receiverBufferSize_ { 8'388'608 }; // Request 8 MB buffer to handle traffic
+    timeval receiverTimeoutConfig_ = { 5, 0 }; // 5 seconds timeout
 };
