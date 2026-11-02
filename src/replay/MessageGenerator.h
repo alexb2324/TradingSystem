@@ -65,5 +65,5 @@ private:
     std::optional<SourceMessage> nextMessage_ {};
     itch::Bytes fileData_ {};
     std::size_t currentOffset_ {};
-    std::uint64_t sequenceNumber_ {1};
+    std::uint64_t sequenceNumber_ { 1 };
 };

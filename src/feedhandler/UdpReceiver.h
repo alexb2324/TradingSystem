@@ -7,13 +7,22 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <system_error>
-#include <print>
+#include <expected>
+#include <cerrno>
+#include <array>
 
 #include "../Usings.h"
 
+
+enum class ReceiverError
+{
+    Timeout,
+    Error
+};
+
 class UdpReceiver
 {
-    
+
 public:
     UdpReceiver(const std::string& address, std::uint16_t port)
     :   socketfd_ { socket(AF_INET, SOCK_DGRAM, 0) }
@@ -22,18 +31,17 @@ public:
         {
             throw std::system_error(errno, std::system_category(), "Failed to open socket");
         }
-        
-        // Setup server address struct 
+
+        // Setup server address struct
         std::memset(&receiverAddr_, 0, sizeof(receiverAddr_));
         receiverAddr_.sin_family = AF_INET; // IPv4
+        receiverAddr_.sin_port = htons(port);
 
-        if (inet_pton(AF_INET, address.c_str(), &receiverAddr_.sin_addr) <= 0) // Bind to 127 exclusively
+        if (inet_pton(AF_INET, address.c_str(), &receiverAddr_.sin_addr) <= 0) // Bind to 127.0.0.1 exclusively
         {
             close(socketfd_);
             throw std::system_error(errno, std::system_category(), "Error occurred with address conversion");
         }
-
-        receiverAddr_.sin_port = htons(port);
 
         if (bind(socketfd_, reinterpret_cast<sockaddr*>(&receiverAddr_), sizeof(receiverAddr_)) == -1)
         {
@@ -42,50 +50,59 @@ public:
         }
 
         // Set timeout for socket
-        const timeval timeoutConfiguration = { 5, 0 }; // 5 seconds timeout
-
-        if (setsockopt(socketfd_, SOL_SOCKET, SO_RCVTIMEO, &timeoutConfiguration, sizeof(timeoutConfiguration)) == -1)
+        if (setsockopt(socketfd_, SOL_SOCKET, SO_RCVTIMEO, &receivertimeoutConfig_, sizeof(receivertimeoutConfig_)) == -1)
         {
             close(socketfd_);
             throw std::system_error(errno, std::system_category(), "Failed to set socket settings");
         }
-    
+
+        // Set socket buffer size
+        if (setsockopt(socketfd_, SOL_SOCKET, SO_RCVBUF, &receiverBufferSize_, sizeof(receiverBufferSize_)) == -1)
+        {
+            close(socketfd_);
+            throw std::system_error(errno, std::system_category(), "Failed to set socket buffer size");
+        }
+
         std::println("UDP Server listening on port {} ...", port);
     }
 
-    std::optional<itch::Bytes> receivePacket()
+    std::expected<itch::Bytes, ReceiverError> receivePacket()
     {
-        socklen_t len = sizeof(senderAddr_);
-        
-        // Receive packet
-        const auto receivedBytes = recvfrom(socketfd_,
-            packetBuffer_.data(),
-            packetBuffer_.size(),
-            0,
-            reinterpret_cast<sockaddr*>(&senderAddr_),
-            &len);
+        while (true)
+        {
+            // Receive packet
+            const auto receivedBytes = recvfrom(socketfd_,
+                packetBuffer_.data(),
+                packetBuffer_.size(),
+                0,
+                nullptr,
+                nullptr);
 
-        if (receivedBytes == -1) { return std::nullopt; }
+            if (receivedBytes >= 0)
+            {
+                return itch::Bytes { packetBuffer_.data(), static_cast<std::size_t>(receivedBytes) };
+            }
 
-        std::println("Received {} bytes while listening", receivedBytes);
-
-        return itch::Bytes { packetBuffer_.data(), static_cast<std::size_t>(receivedBytes) };
+            if (errno == EINTR) { continue; }
+            if (errno == EAGAIN || errno == EWOULDBLOCK) { return std::unexpected { ReceiverError::Timeout }; }
+            return std::unexpected { ReceiverError::Error };
+        }
     }
 
     UdpReceiver(const UdpReceiver& other) = delete;
-    UdpReceiver operator=(const UdpReceiver& other) = delete;
+    UdpReceiver& operator=(const UdpReceiver& other) = delete;
     UdpReceiver(UdpReceiver&& other) = delete;
-    UdpReceiver operator=(UdpReceiver&& other) = delete;
+    UdpReceiver& operator=(UdpReceiver&& other) = delete;
 
     ~UdpReceiver()
     {
         close(socketfd_);
     }
-    
 
 private:
     int socketfd_ {};
     std::array<uint8_t, Constants::kPacketBufferSize> packetBuffer_ {};
     sockaddr_in receiverAddr_ {};
-    sockaddr_in senderAddr_ {};
+    std::int32_t receiverBufferSize_ { 1'048'576 }; // Request 1 MB buffer to handle traffic
+    timeval receivertimeoutConfig_ = { 5, 0 }; // 5 seconds timeout
 };

@@ -13,6 +13,7 @@ public:
 	:	startAt_ { startTime }
 	{ }
 
+	// Returns timepoint when simulator thread should wake and process the next message
 	[[nodiscard]] Timepoint dueAt(const std::uint64_t nextTimestamp) const
 	{
 		const std::chrono::nanoseconds nextTimestampDur { nextTimestamp };

@@ -53,9 +53,9 @@ public:
     }
 
     UdpSender(const UdpSender& other) = delete;
-    UdpSender operator=(const UdpSender& other) = delete;
+    UdpSender& operator=(const UdpSender& other) = delete;
     UdpSender(UdpSender&& other) = delete;
-    UdpSender operator=(UdpSender&& other) = delete;
+    UdpSender& operator=(UdpSender&& other) = delete;
 
     ~UdpSender()
     {
@@ -64,7 +64,6 @@ public:
 
 private:
     int socketfd_;
-    sockaddr_in destAddr_;
+    sockaddr_in destAddr_ {};
     std::size_t sentBytes_ {};
 };
-

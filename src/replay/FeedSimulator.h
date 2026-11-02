@@ -10,7 +10,6 @@
 #include "UdpSender.h"
 #include "Pacer.h"
 #include "../datasource/filesource/FileSource.h"
-#include "../console/Logger.h"
 
 using namespace std::chrono_literals;
 
@@ -21,8 +20,8 @@ public:
     FeedSimulator(const std::filesystem::path& filePath, const std::string& address, std::uint16_t port, std::uint64_t replayStartTime)
     :   fileSource_ { filePath },
         messageSource_ {fileSource_.bytes() },
-        udpSender_ {address, port},
-        pacer_ { replayStartTime }
+        pacer_ { replayStartTime },
+        udpSender_ {address, port}
     {
         std::println("Mapped file successfully.");
     }
@@ -34,10 +33,25 @@ public:
 
         while (const auto message = messageSource_.message())
         {
-            if (!pacer_.isDue(message->timestamp, std::chrono::steady_clock::now()))
+            auto timeNow = std::chrono::steady_clock::now();
+
+            if (!pacer_.isDue(message->timestamp, timeNow))
             {
-                if (!encoder_.empty()) { udpSender_.sendPacket(encoder_.finish()); }
-                std::this_thread::sleep_until(pacer_.dueAt(message->timestamp));
+                if (!encoder_.empty())
+                {
+                    udpSender_.sendPacket(encoder_.finish());
+                }
+
+                const auto wakeTime = pacer_.dueAt(message->timestamp);
+
+                while (timeNow + std::chrono::seconds(1) < wakeTime)
+                {
+                    std::this_thread::sleep_until(timeNow + std::chrono::seconds(1));
+                    udpSender_.sendPacket(encoder_.heartBeat());
+                    timeNow += std::chrono::seconds(1);
+                }
+
+                std::this_thread::sleep_until(wakeTime);
                 continue;
             }
 
@@ -52,13 +66,9 @@ public:
 
         //if (!running_) { return; }
 
-        if (!encoder_.empty())
-        {
-            const auto packet = encoder_.finish();
-            udpSender_.sendPacket(packet);
-        }
+        if (!encoder_.empty()) { udpSender_.sendPacket(encoder_.finish()); }
 
-        const auto endSessionPacket = encoder_.endOfSession(encoder_.nextSequenceNumber());
+        const auto endSessionPacket = encoder_.endOfSession();
         udpSender_.sendPacket(endSessionPacket);
         std::println("Shutdown");
     }
@@ -69,6 +79,5 @@ private:
     MoldUDP64Encoder encoder_;
     Pacer pacer_;
     UdpSender udpSender_;
-    Logger logger_;
     bool running_ { true };
 };

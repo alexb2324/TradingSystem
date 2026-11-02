@@ -1,10 +1,10 @@
 #pragma once
+
 #include <cstdint>
 #include <array>
 #include <optional>
 
 #include "../parser/Decode.h"
-
 #include "../Usings.h"
 #include "../Constants.h"
 
@@ -36,13 +36,21 @@ struct DecodedPacket
     packet.sequenceNumber = convertBLEndian<std::uint64_t>(datagram.data() + 10);
     packet.messageCount = convertBLEndian<std::uint16_t>(datagram.data() + 18);
 
-    if (packet.messageCount == 0) { packet.packetType = PacketType::Heartbeat; return packet;}
-    if (packet.messageCount == Constants::kHeartBeatMessageCount) { packet.packetType = PacketType::EndOfSession; return packet;}
+    if (packet.messageCount == 0 && datagram.size() == Constants::kPacketHeaderLength)
+    {
+        packet.packetType = PacketType::Heartbeat;
+        return packet;
+
+    }
+
+    if (packet.messageCount == Constants::kEOSMessageCount && datagram.size() == Constants::kPacketHeaderLength)
+    {
+        packet.packetType = PacketType::EndOfSession;
+        return packet;
+    }
 
     packet.packetType = PacketType::Data;
     packet.bytes = datagram.subspan(Constants::kPacketHeaderLength, datagram.size() - Constants::kPacketHeaderLength);
 
     return packet;
 }
-
-

@@ -34,7 +34,7 @@ void dispatch(itch::Bytes message, Handler& handler)
 
 	if (!Constants::kItchMessageLengthsMap.contains(static_cast<char>(message[0])))
 	{
-		handler.badMessage(message);
+		handler.badMessage();
 	}
 
     if constexpr (requires { handler.noteMessage(); })

@@ -3,6 +3,7 @@
 #include <thread>
 #include <print>
 #include <array>
+#include <memory>
 
 #include "UdpReceiver.h"
 #include "MoldUDP64Decoder.h"
@@ -11,7 +12,7 @@
 
 using namespace std::chrono_literals;
 
-class FeedHandler 
+class FeedHandler
 {
 
 public:
@@ -25,28 +26,26 @@ public:
     {
         while (running_)
         {
-            if (auto packet = receiver_.receivePacket(); packet)
+            if (auto packet = receiver_.receivePacket())
             {
                 onDatagram(*packet);
             }
-            else
+            else if ((packet.error() == ReceiverError::Timeout && --allowableTimeouts_ == 0) || packet.error() == ReceiverError::Error)
             {
-                std::println("Waiting 1 sec to see if packet has arrived.");
-                std::this_thread::sleep_for(1s);
                 running_ = false;
             }
-
         }
+
+        printSummary();
     }
 
     void onDatagram(itch::Bytes packet)
     {
         const auto decodedPacket = decodePacket(packet);
 
-        if (!decodedPacket) { return; }
+        if (!decodedPacket) { ++badPackets_; return; }
 
-        if (!decodedPacket || decodedPacket->session != session_) { ++invalidSessionPackets_; return; }
-        if (decodedPacket->packetType == PacketType::EndOfSession) { running_ = false; return; }
+        if (decodedPacket->session != session_) { ++invalidSessionPackets_; return; }
 
         if (expectedSequenceNumber_ < decodedPacket->sequenceNumber)
         {
@@ -56,6 +55,7 @@ public:
         }
 
         if (decodedPacket->packetType == PacketType::Heartbeat) { return; }
+        if (decodedPacket->packetType == PacketType::EndOfSession) { running_ = false; return; }
 
         std::size_t readOffset {};
         while (readOffset + Constants::kItchMessageOffset <= decodedPacket->bytes.size())
@@ -65,7 +65,7 @@ public:
             if (readOffset + Constants::kItchMessageOffset + msgLength > decodedPacket->bytes.size()) { break; }
             if (msgLength == 0) { break; }
 
-            dispatch(decodedPacket->bytes.subspan(readOffset + Constants::kItchMessageOffset, msgLength), *marketState_);
+            dispatch<MarketState>(decodedPacket->bytes.subspan(readOffset + Constants::kItchMessageOffset, msgLength), *marketState_);
             readOffset += Constants::kItchMessageOffset + msgLength;
 
             ++expectedSequenceNumber_;
@@ -73,14 +73,27 @@ public:
         processedBytes_ += readOffset;
     }
 
+    void printSummary() const noexcept
+    {
+        std::println("Finished handling feed!");
+        std::println("Total bytes processed - {}", processedBytes_);
+        std::println("Total bad packets detected - {}", badPackets_);
+        std::println("Total invalid session packets detected - {}", invalidSessionPackets_);
+        std::println("Total gaps periods - {}", gaps_);
+        std::println("Total messages missed - {}", missedMessages_);
+        std::println("Total timeouts triggered - {} / 3", 3 - allowableTimeouts_);
+    }
+
 private:
     UdpReceiver receiver_;
     std::unique_ptr<MarketState> marketState_;
-    std::uint64_t expectedSequenceNumber_ {1};
+    std::uint64_t expectedSequenceNumber_ { 1 };
     std::array<char, Constants::kMoldSessionIdSize> session_ {'H', 'e', 'l', 'l', 'o', 'T', 'h', 'e', 'r', 'e'};
+    std::size_t badPackets_ {};
     std::size_t invalidSessionPackets_ {};
     std::size_t gaps_ {};
     std::size_t missedMessages_ {};
     std::size_t processedBytes_ {};
+    std::size_t allowableTimeouts_ { 3 };
     bool running_ { true };
 };
