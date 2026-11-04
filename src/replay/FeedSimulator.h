@@ -17,10 +17,10 @@ class FeedSimulator
 {
 
 public:
-    FeedSimulator(const std::filesystem::path& filePath, const std::string& address, std::uint16_t port, std::uint64_t replayStartTime)
+    FeedSimulator(const std::filesystem::path& filePath, const std::string& address, std::uint16_t port, std::uint32_t playbackSpeed, std::uint64_t replayStartTime)
     :   fileSource_ { filePath },
         messageSource_ {fileSource_.bytes() },
-        pacer_ { replayStartTime },
+        pacer_ { playbackSpeed, replayStartTime },
         udpSender_ {address, port}
     {
         std::println("Mapped file successfully.");

@@ -10,16 +10,16 @@
 
 namespace fs = std::filesystem;
 
-int main(int argv, char* argc[])
+int main(int argc, char* argv[])
 {
 
-	if (argv < 2)
+	if (argc < 4)
 	{
-		std::println(stderr, "Usage: {} <itch-file> [start HH:MM]", argc[0]);
+		std::println(stderr, "Usage: {} <itch-file> <speed> [start HH:MM]", argv[0]);
 		return 1;
 	}
 
-	const std::string_view fileName = argc[1];
+	const std::string_view fileName = argv[1];
 	const std::filesystem::path filePath = std::filesystem::current_path().parent_path() / "res" / fileName;
 
 	std::println("ITCH file path: {}", filePath.string());
@@ -30,7 +30,8 @@ int main(int argv, char* argc[])
 		return 1;
 	}
 
-	const auto startTime = argv == 3 ? parseTimeOfDay(argc[2]) : 0;
+	const std::uint32_t playbackSpeed = std::atoi(argv[2]);
+	const auto startTime = argc == 4 ? parseTimeOfDay(argv[3]) : 0;
 
 	if (!startTime)
 	{
@@ -38,6 +39,6 @@ int main(int argv, char* argc[])
 		return 1;
 	}
 
-	FeedSimulator simulation {filePath, "127.0.0.1", 6969, *startTime};
+	FeedSimulator simulation {filePath, "127.0.0.1", 6969, playbackSpeed, *startTime};
 	simulation.run();
 }

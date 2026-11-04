@@ -10,7 +10,7 @@
 class BookEngine {
 
     using Clock = std::chrono::steady_clock;
-    static constexpr auto kPublishInterval = std::chrono::milliseconds(10);
+    static constexpr auto kPublishInterval = std::chrono::milliseconds(50);
 
 public:
     BookEngine(std::string_view symbol, rigtorp::Seqlock<ConsoleSnapshotMessage>& seqlock)

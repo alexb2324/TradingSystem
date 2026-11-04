@@ -103,6 +103,6 @@ private:
     int socketfd_ {};
     std::array<uint8_t, Constants::kPacketBufferSize> packetBuffer_ {};
     sockaddr_in receiverAddr_ {};
-    std::size_t receiverBufferSize_ { 8'388'608 }; // Request 8 MB buffer to handle traffic
+    int receiverBufferSize_ { 8 * 1024 * 1024 }; // Request 8 MB buffer to handle traffic
     timeval receiverTimeoutConfig_ = { 5, 0 }; // 5 seconds timeout
 };

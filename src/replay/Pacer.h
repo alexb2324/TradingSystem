@@ -9,8 +9,9 @@ class Pacer
 {
 public:
 
-	explicit Pacer(std::uint64_t startTime)
-	:	startAt_ { startTime }
+	Pacer(std::uint32_t speed, std::uint64_t startTime)
+	:	playbackSpeed_ { speed },
+		startAt_ { startTime }
 	{ }
 
 	// Returns timepoint when simulator thread should wake and process the next message
@@ -18,7 +19,7 @@ public:
 	{
 		const std::chrono::nanoseconds nextTimestampDur { nextTimestamp };
 		const std::chrono::nanoseconds exchangeStartDur { exchangeStartTime_ };
-		return wallStartTime_ + nextTimestampDur - exchangeStartDur;
+		return wallStartTime_ + (nextTimestampDur - exchangeStartDur) / playbackSpeed_;
 	}
 
 	[[nodiscard]] bool isDue(const std::uint64_t timestamp, const Timepoint now) noexcept
@@ -37,6 +38,7 @@ public:
 	}
 
 private:
+	std::uint32_t playbackSpeed_ {1};
 	std::uint64_t startAt_ {};
 	std::uint64_t exchangeStartTime_ {};
 	Timepoint wallStartTime_;
