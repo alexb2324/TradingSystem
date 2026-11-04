@@ -34,6 +34,8 @@ add_executable(OrderbookEngine src/apps/engine.cpp
         src/console/ConsoleSnapshotMessage.h
         src/orderbook/OrderbookLevel.h
         libs/rigtorp/Seqlock.h
+        src/BookEngine/BookEngine.cpp
+        src/BookEngine/BookEngine.h
 )
 
 add_executable(FeedReplay src/apps/feed_sim.cpp

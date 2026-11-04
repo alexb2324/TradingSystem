@@ -6,78 +6,79 @@
 
 #include "../tradebook/Tradebook.h"
 #include "../Usings.h"
-
+#include "../../libs/rigtorp/Seqlock.h"
+#include "ConsoleSnapshotMessage.h"
 
 class ConsoleRenderer
 {
 public:
-    ConsoleRenderer() = default;
+    explicit ConsoleRenderer(std::string_view symbol, const rigtorp::Seqlock<ConsoleSnapshotMessage>& seqLock)
+    :   symbol_ { symbol },
+        snapshotSeqLock_ { seqLock }
+    {}
 
     void run(const std::stop_token& stopToken) const
     {
         while (!stopToken.stop_requested())
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            
-            const auto frame = render();
+            const auto snapshot = snapshotSeqLock_.load();
+
+            const auto frame = render(snapshot);
             std::fwrite(frame.data(), 1, frame.size(), stdout);
             std::fflush(stdout);
         }
     }
 
-    [[nodiscard]] std::string render() const
+    [[nodiscard]] std::string render(const ConsoleSnapshotMessage& message) const
     {
-        std::string out = "\x1b[H\x1b[J";                       // cursor home + clear: one write, no flicker
-        auto o = std::back_inserter(out);
-        std::format_to(o, "{:<6} {}   msgs {:>11}   {:>5.2f}M msg/s   live orders {:>8}   unknown refs {}\n\n",
-                       symbol, formatTime(st.exchangeTime), st.messages,
-                       st.wallSeconds > 0 ? st.messages / st.wallSeconds / 1e6 : 0.0,
-                       market.liveOrders(), market.unknownOrders());
-        if (!locate)
+        std::string outputString = "\x1b[H\x1b[J";                       // cursor home + clear: one write, no flicker
+
+        const auto outputIt = std::back_inserter(outputString);
+
+        std::format_to(outputIt, "Stock: {:<6}  Exchange Time: {}\n", symbol_, formatTime(message.exchangeTime));
+
+        std::format_to(outputIt, "Msgs: {:<9}  {:>5.2f}M msg/s   Total Live Orders: {:<9}\n\n\n",
+            message.messages,
+            message.wallSeconds > 0 ? message.messages / message.wallSeconds / 1e6 : 0.0,
+            message.liveOrders);
+
+        if (!message.symbolFound)
         {
-            out += "  (symbol not in stock directory yet)\n"; return out;
+            outputString += "  (Symbol not in stock directory yet)\n"; return outputString;
         }
 
-        const auto& book = market.orderbook(*locate);
-        std::format_to(o, "  {:>6} {:>9} {:>11}  |  {:<11} {:<9} {:<6}\n",
-                       "orders", "bid size", "bid", "ask", "ask size", "orders");
-        auto bid = book.bids().begin();
-        auto ask = book.asks().begin();
-        for (std::size_t i = 0; i < depth_; ++i) {
+        std::format_to(outputIt, " -------------------------- Orderbook ----------------------------\n");
+        std::format_to(outputIt, " | {:>6} {:>9} {:>11}     {:<11} {:<9} {:<6} |\n", "Orders", "Shares", "Price", "Price", "Shares", "Orders");
+
+        for (int i {}; i < message.bids.size(); ++i)
+        {
             std::string left(29, ' '), right;
+            left = std::format(" | {:>6} {:>9} {:>11}", message.bids[i].orderCount, message.bids[i].totalShares, formatPrice(message.bids[i].price));
+            right = std::format("{:<11} {:<9} {:<6} |", formatPrice(message.asks[i].price), message.asks[i].totalShares, message.asks[i].orderCount);
 
-            if (bid != book.bids().end()) {
-                left = std::format("  {:>6} {:>9} {:>11}", bid->second.orderCount, bid->second.totalShares, formatPrice(bid->first));
-                ++bid;
-            }
-
-            if (ask != book.asks().end()) {
-                right = std::format("{:<11} {:<9} {:<6}", formatPrice(ask->first), ask->second.totalShares, ask->second.orderCount);
-                ++ask;
-            }
-            std::format_to(o, "{}  |  {}\n", left, right);
+            std::format_to(outputIt, "{}  |  {}\n", left, right);
         }
+        std::format_to(outputIt, " -----------------------------------------------------------------\n");
 
-        std::format_to(o, "\n  Recent trades\n  {:<18} {:>11} {:>8} {:>4} {:>4}\n", "time", "price", "shares", "side", "type");
-        // Scan the global tape backwards, bounded so a quiet symbol doesn't scan the whole day.
-        const auto& all = tape.trades();
-        std::size_t shown = 0, scanned = 0;
-        for (auto it = all.rbegin(); it != all.rend() && shown < trades_ && scanned < kMaxScan; ++it, ++scanned) {
-            if (it->stockLocate != *locate) continue;
-            std::format_to(o, "  {:<18} {:>11} {:>8} {:>4} {:>4}{}\n", formatTime(it->timestamp), formatPrice(it->price),
-                           it->shares, it->side, static_cast<char>(it->tradeType), it->broken ? "  BROKEN" : "");
-            ++shown;
+        std::format_to(outputIt, "\n  Recent trades\n  {:<14} {:>11} {:>8} {:>6} {:>6}\n", "Time", "Price", "Shares", "Side", "Type");
+        for (const auto& trade : message.recentTrades)
+        {
+            std::format_to(outputIt, "  {:<14} {:>11} {:>8} {:>6} {:>6}{}\n", formatTime(trade.timestamp), formatPrice(trade.price),
+                               trade.shares, trade.side, static_cast<char>(trade.tradeType),
+                               trade.broken ? "  BROKEN" : "");
         }
-        return out;
+        return outputString;
     }
 
     static std::string formatPrice(orderbook::Price p) { return std::format("{}.{:04}", p / 10000, p % 10000); }
     static std::string formatTime(itch::Timestamp ns)
     {
         const auto s = ns / 1'000'000'000;
-        return std::format("{:02}:{:02}:{:02}.{:09}", s / 3600, s / 60 % 60, s % 60, ns % 1'000'000'000);
+        return std::format("{:02}:{:02}:{:02}.{:03}", s / 3600, s / 60 % 60, s % 60, ns % 1'000);
     }
 
 private:
-
+    std::string symbol_ {};
+    const rigtorp::Seqlock<ConsoleSnapshotMessage>& snapshotSeqLock_;
 };

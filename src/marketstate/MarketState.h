@@ -5,6 +5,7 @@
 #include "../stockdirectory/StockDirectory.h"
 #include "../tradebook/Tradebook.h"
 #include "Market.h"
+#include "../console/ConsoleSnapshotMessage.h"
 
 #include "../parser/Messages.h"
 
@@ -53,6 +54,8 @@ public:
 
 	[[nodiscard]] std::uint64_t   messageCount()  const noexcept { return messages_; }
 	[[nodiscard]] itch::Timestamp lastTimestamp() const noexcept { return lastTimestamp_; }
+
+	void fillSnapshot(std::optional<itch::StockLocate> stockLocate, ConsoleSnapshotMessage& snapshotMessage) const;
 
 	[[nodiscard]] const StockDirectory& stockDirectory() const noexcept { return stockDirectory_; }
 	[[nodiscard]] const Market& market() const noexcept { return market_; }

@@ -13,9 +13,9 @@
 #include "../console/ConsoleRenderer.h"
 #include "../parser/Dispatch.h"
 #include "../datasource/filesource/FileSource.h"
-#include "../console/CountingHandler.h"
 #include "../feedhandler/FeedHandler.h"
 #include "../marketstate/MarketState.h"
+#include "../BookEngine/BookEngine.h"
 #include "../../libs/rigtorp/Seqlock.h"
 
 #include "../console/ConsoleSnapshotMessage.h"
@@ -111,9 +111,7 @@ int main(int argc, char* argv[])
 }
 */
 
-
-rigtorp::Seqlock<ConsoleRenderer> g_seqLock;
-
+// Pin thread to specified core
 static bool pinThreadToCore(std::jthread& thread, const int core) noexcept
 {
     cpu_set_t cpuset;
@@ -132,18 +130,24 @@ int main(int argc, char* argv[])
 
     const std::string symbol = argv[1];
     std::optional<itch::StockLocate> locate;
+    rigtorp::Seqlock<ConsoleSnapshotMessage> snapshotLock;
 
-    FeedHandler marketDataFeed {"127.0.0.1", 6969};
-    ConsoleRenderer renderer {};
+    // Start all
+    BookEngine engine {symbol, snapshotLock};
+    FeedHandler marketDataFeed {"127.0.0.1", 6969, engine};
+    ConsoleRenderer renderer {symbol, snapshotLock};
 
+    // Console renderer runs on separate thread so as not to block hotpath
     std::jthread feedThread (&FeedHandler::run, &marketDataFeed);
     std::jthread rendererThread (&ConsoleRenderer::run, &renderer);
 
+    // Pin to separate cores
     pinThreadToCore(feedThread, 2);
     pinThreadToCore(rendererThread, 3);
 
-    std::this_thread::sleep_for(10s);
-    feedThread.request_stop();
-    rendererThread.request_stop();
+    // Kill after 10s
+    std::this_thread::sleep_for(3600s);
+    //feedThread.request_stop();
+    //rendererThread.request_stop();
 
 }

@@ -193,3 +193,44 @@ void MarketState::onDirectListingCapitalRaise(const DirectListingCapitalRaiseMes
 {
     //std::println("DirectListingCapitalRaise");
 }
+
+void MarketState::fillSnapshot(std::optional<itch::StockLocate> stockLocate, ConsoleSnapshotMessage& snapshotMessage) const
+{
+    snapshotMessage.messages = messages_;
+    snapshotMessage.liveOrders = market_.liveOrders();
+    snapshotMessage.exchangeTime = lastTimestamp_;
+    snapshotMessage.symbolFound = stockLocate.has_value();
+    snapshotMessage.tradeCount = 0;
+
+    if (!stockLocate) { return; }
+
+    const auto& book = market_.orderbook(*stockLocate);
+
+    auto bid = book.bids().begin();
+    auto ask = book.asks().begin();
+    for (std::size_t i {}; i < snapshotMessage.bids.size(); ++i) {
+        if (bid != book.bids().end()) {
+            snapshotMessage.bids[i] = { .totalShares = bid->second.totalShares, .price = bid->first, .orderCount = bid->second.orderCount};
+            ++bid;
+        }
+
+        if (ask != book.asks().end()) {
+            snapshotMessage.asks[i] = { .totalShares = ask->second.totalShares, .price = ask->first, .orderCount = ask->second.orderCount};
+            ++ask;
+        }
+    }
+
+    // Scan the global tape backwards, bounded so a quiet symbol doesn't scan the whole day.
+    constexpr std::size_t kMaxScan = 50'000;
+    const auto& allTrades = tradeBook_.trades();
+    std::size_t scanned = 0;
+    for (auto it = allTrades.rbegin(); it != allTrades.rend() &&
+            snapshotMessage.tradeCount < snapshotMessage.recentTrades.size() && scanned < kMaxScan;
+            ++it, ++scanned)
+    {
+        if (it->stockLocate == *stockLocate)
+        {
+            snapshotMessage.recentTrades[snapshotMessage.tradeCount++] = *it;
+        }
+    }
+}

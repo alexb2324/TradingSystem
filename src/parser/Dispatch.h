@@ -36,7 +36,7 @@ void dispatch(itch::Bytes message, Handler& handler)
 		handler.badMessage();
 	}
 
-    if constexpr (requires { handler.noteMessage(); })
+    if constexpr (requires (itch::Timestamp timestamp) { handler.noteMessage(timestamp); })
     {
         handler.noteMessage(convertBLEndian48(message.data() + 5));
     }

@@ -9,17 +9,17 @@
 #include "MoldUDP64Decoder.h"
 #include "../parser/Dispatch.h"
 #include "../marketstate/MarketState.h"
+#include "../BookEngine/BookEngine.h"
 
 using namespace std::chrono_literals;
 
 class FeedHandler
 {
-
 public:
 
-    FeedHandler(const std::string& address, const std::uint16_t port)
+    FeedHandler(const std::string& address, const std::uint16_t port, BookEngine& engine)
     :   receiver_ {address, port},
-        marketState_ { std::make_unique<MarketState>() }
+        engine_ { engine }
     { }
 
     void run(const std::stop_token& stopToken)
@@ -34,8 +34,10 @@ public:
             {
                 running_ = false;
             }
+            engine_.tryPublishSnapshot();
         }
 
+        engine_.tryPublishSnapshot(true);
         printSummary();
     }
 
@@ -65,7 +67,8 @@ public:
             if (readOffset + Constants::kItchMessageOffset + msgLength > decodedPacket->bytes.size()) { break; }
             if (msgLength == 0) { break; }
 
-            dispatch<MarketState>(decodedPacket->bytes.subspan(readOffset + Constants::kItchMessageOffset, msgLength), *marketState_);
+            // Dispatch to engine for decoding, processing, publishing
+            engine_.onMessage(decodedPacket->bytes.subspan(readOffset + Constants::kItchMessageOffset, msgLength));
             readOffset += Constants::kItchMessageOffset + msgLength;
 
             ++expectedSequenceNumber_;
@@ -99,7 +102,7 @@ public:
 
 private:
     UdpReceiver receiver_;
-    std::unique_ptr<MarketState> marketState_;
+    BookEngine& engine_;
     std::uint64_t expectedSequenceNumber_ { 1 };
     std::array<char, Constants::kMoldSessionIdSize> session_ {'H', 'e', 'l', 'l', 'o', 'T', 'h', 'e', 'r', 'e'};
     std::size_t badPackets_ {};
