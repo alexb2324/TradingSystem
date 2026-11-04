@@ -2,36 +2,30 @@
 
 #include <format>
 #include <iterator>
-#include <optional>
 #include <string>
-#include <string_view>
 
-#include "../marketstate/Market.h"
 #include "../tradebook/Tradebook.h"
 #include "../Usings.h"
 
-struct ReplayStats
-{
-    std::uint64_t   messages {};
-    itch::Timestamp exchangeTime {};   // ns since midnight
-    double          wallSeconds {};
-};
 
-
-
-class ConsoleView
+class ConsoleRenderer
 {
 public:
-    explicit ConsoleView(std::size_t depth = 10, std::size_t trades = 10)
-    :   depth_{depth},
-        trades_{trades}
-    {}
+    ConsoleRenderer() = default;
 
-    [[nodiscard]] std::string render(std::string_view symbol,
-        std::optional<itch::StockLocate> locate,
-        const Market& market,
-        const Tradebook& tape,
-        const ReplayStats& st) const
+    void run(const std::stop_token& stopToken) const
+    {
+        while (!stopToken.stop_requested())
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            
+            const auto frame = render();
+            std::fwrite(frame.data(), 1, frame.size(), stdout);
+            std::fflush(stdout);
+        }
+    }
+
+    [[nodiscard]] std::string render() const
     {
         std::string out = "\x1b[H\x1b[J";                       // cursor home + clear: one write, no flicker
         auto o = std::back_inserter(out);
@@ -85,6 +79,5 @@ public:
     }
 
 private:
-    static constexpr std::size_t kMaxScan = 200'000;
-    std::size_t depth_, trades_;
+
 };

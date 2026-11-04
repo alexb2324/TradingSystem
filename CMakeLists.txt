@@ -26,13 +26,14 @@ add_executable(OrderbookEngine src/apps/engine.cpp
         src/orderbook/Order.h
         src/marketstate/Market.cpp
         src/marketstate/Market.h
-        src/console/CountingHandler.h
-        src/console/CountingHandler.cpp
-        src/console/ConsoleViewer.cpp
-        src/console/ConsoleViewer.h
+        src/console/ConsoleRenderer.cpp
+        src/console/ConsoleRenderer.h
         src/feedhandler/FeedHandler.h
         src/feedhandler/UdpReceiver.h
         src/feedhandler/MoldUDP64Decoder.h
+        src/console/ConsoleSnapshotMessage.h
+        src/orderbook/OrderbookLevel.h
+        libs/rigtorp/Seqlock.h
 )
 
 add_executable(FeedReplay src/apps/feed_sim.cpp
@@ -46,14 +47,3 @@ add_executable(FeedReplay src/apps/feed_sim.cpp
         src/datasource/filesource/FileSource.h
         src/replay/TimeUtil.h
 )
-
-include(FetchContent)
-
-FetchContent_Declare(
-        spdlog
-        GIT_REPOSITORY https://github.com/gabime/spdlog.git
-        GIT_TAG v1.17.0
-)
-
-FetchContent_MakeAvailable(spdlog)
-target_link_libraries(FeedReplay PRIVATE spdlog::spdlog)

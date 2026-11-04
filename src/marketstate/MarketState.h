@@ -1,5 +1,7 @@
 #pragma once
 
+#include <queue>
+
 #include "../stockdirectory/StockDirectory.h"
 #include "../tradebook/Tradebook.h"
 #include "Market.h"
@@ -10,6 +12,7 @@ class MarketState {
 
 public:
 	MarketState() = default;
+
 	MarketState(const MarketState& other) = delete;
 	MarketState& operator=(const MarketState& other) = delete;
 	MarketState(MarketState&& other) = delete;
@@ -47,6 +50,7 @@ public:
 
 	void noteMessage(itch::Timestamp ts) noexcept { ++messages_; lastTimestamp_ = ts; }
 	void badMessage() noexcept { ++badMessages_; }
+
 	[[nodiscard]] std::uint64_t   messageCount()  const noexcept { return messages_; }
 	[[nodiscard]] itch::Timestamp lastTimestamp() const noexcept { return lastTimestamp_; }
 

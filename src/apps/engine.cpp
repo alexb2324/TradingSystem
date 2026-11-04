@@ -6,15 +6,19 @@
 #include <chrono>
 #include <iostream>
 #include <optional>
+#include <thread>
+#include <sched.h>
+#include <pthread.h>
 
-
-#include "../console/ConsoleViewer.h"
+#include "../console/ConsoleRenderer.h"
 #include "../parser/Dispatch.h"
 #include "../datasource/filesource/FileSource.h"
 #include "../console/CountingHandler.h"
 #include "../feedhandler/FeedHandler.h"
 #include "../marketstate/MarketState.h"
+#include "../../libs/rigtorp/Seqlock.h"
 
+#include "../console/ConsoleSnapshotMessage.h"
 
 // Console viewer
 /*
@@ -103,24 +107,43 @@ int main(int argc, char* argv[])
     const auto parsedBytes = parseData(data, counter);
     counter.report(stdout);
 
-
-
     return 0;
 }
 */
 
-int main()
+
+rigtorp::Seqlock<ConsoleRenderer> g_seqLock;
+
+static bool pinThreadToCore(std::jthread& thread, const int core) noexcept
 {
-    FeedHandler marketDataFeed {"127.0.0.1", 6969};
-    marketDataFeed.run();
-
-
-    //MOldUDP64Encoder encoder;
-    //UDPSender sender {messageSource, encoder};
-    //encoder.encode()
-    //messageSource.play(encoder);
-
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(core, &cpuset);
+    return pthread_setaffinity_np(thread.native_handle(), sizeof(cpuset), &cpuset) == 0;
 }
 
-//"/Users/unknownuser/Desktop/Git/TradingSystem/res/01302019.NASDAQ_ITCH50"
-//home/hehexd2324/CLionProjects/TradingSystem/res/01302019.NASDAQ_ITCH50
+int main(int argc, char* argv[])
+{
+    if (argc < 2)
+    {
+        std::println(stderr, "Usage: {} <SYMBOL>", argv[0]);
+        return 1;
+    }
+
+    const std::string symbol = argv[1];
+    std::optional<itch::StockLocate> locate;
+
+    FeedHandler marketDataFeed {"127.0.0.1", 6969};
+    ConsoleRenderer renderer {};
+
+    std::jthread feedThread (&FeedHandler::run, &marketDataFeed);
+    std::jthread rendererThread (&ConsoleRenderer::run, &renderer);
+
+    pinThreadToCore(feedThread, 2);
+    pinThreadToCore(rendererThread, 3);
+
+    std::this_thread::sleep_for(10s);
+    feedThread.request_stop();
+    rendererThread.request_stop();
+
+}

@@ -31,7 +31,6 @@ std::size_t parseData(const itch::Bytes data, Handler& handler)
 template <typename Handler>
 void dispatch(itch::Bytes message, Handler& handler)
 {
-
 	if (!Constants::kItchMessageLengthsMap.contains(static_cast<char>(message[0])))
 	{
 		handler.badMessage();

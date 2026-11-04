@@ -22,9 +22,9 @@ public:
         marketState_ { std::make_unique<MarketState>() }
     { }
 
-    void run()
+    void run(const std::stop_token& stopToken)
     {
-        while (running_)
+        while (running_ && !stopToken.stop_requested())
         {
             if (auto packet = receiver_.receivePacket())
             {
@@ -76,12 +76,25 @@ public:
     void printSummary() const noexcept
     {
         std::println("Finished handling feed!");
-        std::println("Total bytes processed - {}", processedBytes_);
+        printlnBytes(processedBytes_);
         std::println("Total bad packets detected - {}", badPackets_);
         std::println("Total invalid session packets detected - {}", invalidSessionPackets_);
         std::println("Total gaps periods - {}", gaps_);
         std::println("Total messages missed - {}", missedMessages_);
         std::println("Total timeouts triggered - {} / 3", 3 - allowableTimeouts_);
+    }
+
+    static void printlnBytes(const std::size_t bytes)
+    {
+        std::string value = std::to_string(bytes);
+
+        for (std::size_t i = value.length() - 3; i > 0; i -= 3)
+        {
+            value.insert(i, ",");
+            if (i <= 3) { break; }
+        }
+
+        std::println("Total bytes processed - {}", value);
     }
 
 private:
