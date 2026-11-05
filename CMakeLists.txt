@@ -20,7 +20,6 @@ add_executable(OrderbookEngine src/apps/engine.cpp
         src/marketstate/MarketState.h
         src/Constants.h
         src/Usings.h
-        src/datasource/filesource/FileSource.cpp
         src/datasource/filesource/FileSource.h
         src/orderbook/Order.cpp
         src/orderbook/Order.h
@@ -45,7 +44,6 @@ add_executable(FeedReplay src/apps/feed_sim.cpp
         src/replay/Pacer.h
         src/replay/UdpSender.h
         src/replay/FeedSimulator.h
-        src/datasource/filesource/FileSource.cpp
         src/datasource/filesource/FileSource.h
         src/replay/TimeUtil.h
 )

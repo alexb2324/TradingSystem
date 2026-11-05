@@ -41,7 +41,7 @@ public:
         printSummary();
     }
 
-    void onDatagram(itch::Bytes packet)
+    void onDatagram(const itch::Bytes packet)
     {
         const auto decodedPacket = decodePacket(packet);
 
@@ -79,7 +79,7 @@ public:
     void printSummary() const noexcept
     {
         std::println("Finished handling feed!");
-        printlnBytes(processedBytes_);
+        std::println("Total bytes processed - {}", formatBytes(processedBytes_));
         std::println("Total bad packets detected - {}", badPackets_);
         std::println("Total invalid session packets detected - {}", invalidSessionPackets_);
         std::println("Total gaps periods - {}", gaps_);
@@ -87,17 +87,17 @@ public:
         std::println("Total timeouts triggered - {} / 3", 3 - allowableTimeouts_);
     }
 
-    static void printlnBytes(const std::size_t bytes)
+    static std::string formatBytes(const std::size_t bytes)
     {
-        std::string value = std::to_string(bytes);
+        std::string byteString = std::to_string(bytes);
 
-        for (std::size_t i = value.length() - 3; i > 0; i -= 3)
+        for (std::size_t i = byteString.length() - 3; i > 0; i -= 3)
         {
-            value.insert(i, ",");
+            byteString.insert(i, ",");
             if (i <= 3) { break; }
         }
 
-        std::println("Total bytes processed - {}", value);
+        return byteString;
     }
 
 private:

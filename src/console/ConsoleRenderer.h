@@ -22,7 +22,7 @@ public:
         while (!stopToken.stop_requested())
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            const auto snapshot = snapshotSeqLock_.load();
+            const auto snapshot = snapshotSeqLock_.load(); // Read snapshot from SeqLock
 
             const auto frame = render(snapshot);
             std::fwrite(frame.data(), 1, frame.size(), stdout);
@@ -36,9 +36,7 @@ public:
 
         const auto outputIt = std::back_inserter(outputString);
 
-        std::format_to(outputIt, "Stock: {:<6}  Exchange Time: {}\n", symbol_, formatTime(message.exchangeTime));
-
-        std::format_to(outputIt, "Msgs: {:<9}  {:>5.2f}M msg/s   Total Live Orders: {:<9}\n\n\n",
+        std::format_to(outputIt, "Msgs Processed: {:<9}  {:>5.2f}M msg/s   Total Live Orders: {:<9}\n",
             message.messages,
             message.wallSeconds > 0 ? message.messages / message.wallSeconds / 1e6 : 0.0,
             message.liveOrders);
@@ -48,8 +46,11 @@ public:
             outputString += "  (Symbol not in stock directory yet)\n"; return outputString;
         }
 
+        std::format_to(outputIt, "Stock: {:<6}  Price: {:<8}  Exchange Time: {}\n\n\n", symbol_, formatPriceHeader(message.recentTrades.front().price), formatTime(message.exchangeTime));
         std::format_to(outputIt, " -------------------------- Orderbook ----------------------------\n");
-        std::format_to(outputIt, " | {:>6} {:>9} {:>11}     {:<11} {:<9} {:<6} |\n", "Orders", "Shares", "Price", "Price", "Shares", "Orders");
+        std::format_to(outputIt, " | {:>6} {:>9} {:>11}     {:<11} {:<9} {:<6} |\n", "Volume", "Shares", "Price", "Price", "Shares", "Volume");
+
+        std::format_to(outputIt, "");
 
         for (int i {}; i < message.bids.size(); ++i)
         {
@@ -71,7 +72,8 @@ public:
         return outputString;
     }
 
-    static std::string formatPrice(orderbook::Price p) { return std::format("{}.{:04}", p / 10000, p % 10000); }
+    static std::string formatPriceHeader(orderbook::Price p) { return std::format("{}.{:02}", p / 10'000, (p % 10'000) / 100); }
+    static std::string formatPrice(orderbook::Price p) { return std::format("{}.{:04}", p / 10'000, p % 10'000); }
     static std::string formatTime(itch::Timestamp ns)
     {
         const auto s = ns / 1'000'000'000;
