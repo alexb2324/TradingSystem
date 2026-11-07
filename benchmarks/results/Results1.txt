@@ -1,0 +1,179 @@
+Results 07/11/2026
+
+
+Notes:
+Broken trades (B) very slow, millisecond range, requires traversing entire vector of trades, bottleneck for entire system
+Trades S, R, H fast due to processing before trade tape and order book are populated
+Important messages: Add order (A, F), execute order (E, C, X, U), trade (P, Q)
+
+
+Message Type: I
+-------------------
+p50        30.01 ns
+p90        40.01 ns
+p99       100.02 ns
+p99.9     240.05 ns
+p99.99    379.13 ns
+max       144.85 us   (count = 3,684,511)
+
+Message Type: B
+-------------------
+p50       577.46 us
+p90       639.89 us
+p99         1.30 ms
+p99.9       1.34 ms
+p99.99      1.34 ms
+max         1.35 ms   (count = 116)
+
+Message Type: Q
+-------------------
+p50        50.01 ns
+p90        60.01 ns
+p99         1.17 us
+p99.9       3.31 us
+p99.99      5.52 us
+max         8.02 us   (count = 17,430)
+
+Message Type: P
+-------------------
+p50        50.01 ns
+p90        60.01 ns
+p99       379.13 ns
+p99.9       2.36 us
+p99.99      5.06 us
+max       126.89 us   (count = 1,326,184)
+
+Message Type: U
+-------------------
+p50       220.05 ns
+p90       388.65 ns
+p99       720.15 ns
+p99.9       1.16 us
+p99.99      4.21 us
+max       247.20 us   (count = 27,222,746)
+
+Message Type: D
+-------------------
+p50       160.03 ns
+p90       289.58 ns
+p99       560.12 ns
+p99.9     975.44 ns
+p99.99      3.96 us
+max       155.14 us   (count = 158,273,361)
+
+Message Type: X
+-------------------
+p50       110.02 ns
+p90       240.05 ns
+p99       379.13 ns
+p99.9     769.68 ns
+p99.99      3.73 us
+max        17.42 us   (count = 4,669,874)
+
+Message Type: C
+-------------------
+p50       110.02 ns
+p90       268.63 ns
+p99       937.34 ns
+p99.9       2.48 us
+p99.99      5.18 us
+max        33.06 us   (count = 158,886)
+
+Message Type: S
+-------------------
+p50       140.03 ns
+p90         3.34 us
+p99         3.34 us
+p99.9       3.34 us
+p99.99      3.34 us
+max         3.34 us   (count = 6)
+
+Message Type: F
+-------------------
+p50       110.02 ns
+p90       259.10 ns
+p99       617.27 ns
+p99.9       1.62 us
+p99.99      4.21 us
+max        19.45 us   (count = 1,725,898)
+
+Message Type: R
+-------------------
+p50        40.01 ns
+p90        50.01 ns
+p99        60.01 ns
+p99.9      90.02 ns
+p99.99      6.13 us
+max         6.15 us   (count = 8,714)
+
+Message Type: E
+-------------------
+p50       149.56 ns
+p90       329.59 ns
+p99         1.49 us
+p99.9       2.61 us
+p99.99      5.24 us
+max       125.89 ms   (count = 8,096,995)
+
+Message Type: H
+-------------------
+p50        40.01 ns
+p90        50.01 ns
+p99        70.01 ns
+p99.9     169.56 ns
+p99.99    388.65 ns
+max       390.08 ns   (count = 8,805)
+
+Message Type: Y
+-------------------
+p50        40.01 ns
+p90        50.01 ns
+p99        60.01 ns
+p99.9     129.55 ns
+p99.99    280.06 ns
+max       280.06 ns   (count = 8,821)
+
+Message Type: L
+-------------------
+p50        30.01 ns
+p90        40.01 ns
+p99        40.01 ns
+p99.9      60.01 ns
+p99.99    240.05 ns
+max         4.95 us   (count = 193,769)
+
+Message Type: V
+-------------------
+p50        60.01 ns
+p90        60.01 ns
+p99        60.01 ns
+p99.9      60.01 ns
+p99.99     60.01 ns
+max        60.01 ns   (count = 1)
+
+Message Type: J
+-------------------
+p50        70.01 ns
+p90       140.03 ns
+p99       400.08 ns
+p99.9     400.08 ns
+p99.99    400.08 ns
+max       400.08 ns   (count = 62)
+
+Message Type: A
+-------------------
+p50       100.02 ns
+p90       229.57 ns
+p99       440.09 ns
+p99.9     777.31 ns
+p99.99      3.78 us
+max       848.05 us   (count = 162,970,455)
+
+Overall Results
+-------------------
+p50       129.55 ns
+p90       280.06 ns
+p99       537.26 ns
+p99.9       1.06 us
+p99.99      3.96 us
+max       125.89 ms   (count = 368,366,634)

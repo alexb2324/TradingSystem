@@ -9,6 +9,10 @@
 #include "../marketstate/MarketState.h"
 #include "../parser/Dispatch.h"
 
+#include "../../benchmarks/MessageLatency.h"
+#include "../../benchmarks/BenchmarkUtil.h"
+
+template <typename Timing = NoTiming>
 class BookEngine {
 
     using Clock = std::chrono::steady_clock;
@@ -21,9 +25,23 @@ public:
         startTime_ { Clock::now() }
     {}
 
-    void onMessage(const itch::Bytes message) const { dispatch(message, *marketState_); }
+    void onMessage(const itch::Bytes message)
+    {
+        if constexpr (Timing::kEnabled)
+        {
+            const auto t0 = cycles();
+            dispatch(message, *marketState_);
+            timing_.record(message[0], cycles() - t0);
+        }
+        else
+        {
+            dispatch(message, *marketState_);
+        }
+
+    }
 
     [[nodiscard]] MarketState& marketState() const { return *marketState_; }
+    [[nodiscard]] Timing& timing() { return timing_; }
 
     void tryPublishSnapshot(const bool force = false) noexcept
     {
@@ -47,6 +65,7 @@ private:
     ConsoleSnapshotMessage currentSnapshot_ {};
     Clock::time_point startTime_ {};
     Clock::time_point lastPublishTime_ {};
+    [[no_unique_address]] Timing timing_ {};
 };
 
 

@@ -18,6 +18,9 @@
 #include "../BookEngine/BookEngine.h"
 #include "../../libs/rigtorp/Seqlock.h"
 
+#include "../../benchmarks/LatencyHistogram.h"
+#include "../../benchmarks/BenchmarkUtil.h"
+
 using Clock = std::chrono::steady_clock;
 
 
@@ -29,7 +32,6 @@ static std::string formatNumber(std::size_t value)
     {
         result.insert(static_cast<std::size_t>(i), ",");
     }
-
     return result;
 }
 
@@ -61,12 +63,12 @@ static void printUsage(const char* prog)
 static void runProd(const std::string& symbol)
 {
     rigtorp::Seqlock<ConsoleSnapshotMessage> snapshotLock;
-    BookEngine      engine   {symbol, snapshotLock};
-    FeedHandler     feed     {"127.0.0.1", 6969, engine};   // throws here if the socket fails
-    ConsoleRenderer renderer {symbol, snapshotLock};
+    BookEngine<>                    engine   {symbol, snapshotLock};
+    FeedHandler<BookEngine<>>       feed     {"127.0.0.1", 6969, engine};   // throws here if the socket fails
+    ConsoleRenderer                 renderer {symbol, snapshotLock};
 
     std::exception_ptr feedError;
-    std::jthread feedThread(&FeedHandler::run, &feed);
+    std::jthread feedThread(&FeedHandler<BookEngine<>>::run, &feed);
     std::jthread rendererThread(&ConsoleRenderer::run, &renderer);
 
     pinOrWarn(feedThread.native_handle(), 1, "feed");
@@ -90,7 +92,7 @@ static void runTest(const std::string& symbol, const std::filesystem::path& file
     }
 
     rigtorp::Seqlock<ConsoleSnapshotMessage> snapshotLock;
-    BookEngine engine {symbol, snapshotLock};
+    BookEngine<MessageLatency> engine {symbol, snapshotLock};
 
     // Ensure sufficient RAM before trying to fault in all pages
     FileSource fileSource {filePath, true};
@@ -101,7 +103,7 @@ static void runTest(const std::string& symbol, const std::filesystem::path& file
     std::println("Processing {} ({} bytes)...", filePath.string(), formatNumber(fileData.size()));
 
     std::size_t readOffset {};
-    const auto startTime = Clock::now();
+    //const auto startTime = Clock::now();
 
     while (readOffset + Constants::kItchMessageOffset <= fileData.size())
     {
@@ -110,9 +112,14 @@ static void runTest(const std::string& symbol, const std::filesystem::path& file
         if (readOffset + Constants::kItchMessageOffset + msgLength > fileData.size()) { break; }
 
         engine.onMessage(fileData.subspan(readOffset + Constants::kItchMessageOffset, msgLength));
+
         readOffset += Constants::kItchMessageOffset + msgLength;
     }
 
+    const double nsPerCycle = calibrateNsPerCycle(); // Samples 1'000'000 times for average nsPerCycle
+    engine.timing().reportEachMessageLatency(nsPerCycle);
+    engine.timing().reportAll(nsPerCycle);
+    /*
     const auto endTime = Clock::now();
 
 
@@ -127,6 +134,7 @@ static void runTest(const std::string& symbol, const std::filesystem::path& file
     std::println("Throughput         : {:.2f} M msgs/s, {:.1f} MB/s",
                  messages / seconds / 1e6, readOffset / seconds / 1e6);
     std::println("Avg per message    : {:.1f} ns", seconds * 1e9 / static_cast<double>(messages));
+    */
 }
 
 int main(int argc, char* argv[])

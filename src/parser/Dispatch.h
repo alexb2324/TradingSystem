@@ -5,185 +5,161 @@
 #include "Messages.h"
 #include "../Constants.h"
 
+#include "../marketstate/MarketState.h"
+
 #include <cstdio>
 
-template <typename Handler>
-std::size_t parseData(const itch::Bytes data, Handler& handler)
-{
-    std::size_t readOffset {};
 
-    while (readOffset + Constants::kItchMessageOffset <= data.size())
-    {
-        const auto msgLength = convertBLEndian<itch::MessageLength>(data.data() + readOffset);
-
-        if (readOffset + Constants::kItchMessageOffset + msgLength > data.size()) { break; }
-        if (msgLength == 0) { break; }
-
-        dispatch(data.subspan(readOffset + Constants::kItchMessageOffset, msgLength), handler);
-
-        readOffset += Constants::kItchMessageOffset + msgLength;
-    }
-
-    return readOffset;
-}
-
-
-template <typename Handler>
-void dispatch(itch::Bytes message, Handler& handler)
+inline void dispatch(itch::Bytes message, MarketState& marketStateHandler)
 {
 	if (!Constants::kItchMessageLengthsMap.contains(static_cast<char>(message[0])))
 	{
-		handler.badMessage();
+		marketStateHandler.badMessage();
 	}
 
-    if constexpr (requires (itch::Timestamp timestamp) { handler.noteMessage(timestamp); })
+    if constexpr (requires (itch::Timestamp timestamp) { marketStateHandler.noteMessage(timestamp); })
     {
-        handler.noteMessage(convertBLEndian48(message.data() + 5));
-    }
-
-    if constexpr (requires { handler.onRawMessage(message); })
-    {
-        handler.onRawMessage(message);
+        marketStateHandler.noteMessage(convertBLEndian48(message.data() + 5));
     }
 
 	switch (static_cast<MessageType>(message[0]))
     {
         case MessageType::SystemEventMessage:
-            if constexpr (requires (const SystemEventMessage& msg) { handler.onSystemEvent(msg); })
+            if constexpr (requires (const SystemEventMessage& msg) { marketStateHandler.onSystemEvent(msg); })
             {
-                handler.onSystemEvent(decodeSystemEventMessage(message));
+                marketStateHandler.onSystemEvent(decodeSystemEventMessage(message));
             }
             break;
         case MessageType::StockDirectoryMessage:
-	        if constexpr (requires (const StockDirectoryMessage& msg) { handler.onStockDirectory(msg); })
+	        if constexpr (requires (const StockDirectoryMessage& msg) { marketStateHandler.onStockDirectory(msg); })
             {
-                handler.onStockDirectory(decodeStockDirectoryMessage(message));
+                marketStateHandler.onStockDirectory(decodeStockDirectoryMessage(message));
             }
 	        break;
         case MessageType::StockTradingActionMessage:
-            if constexpr (requires (const StockTradingActionMessage& msg) { handler.onStockTradingAction(msg); })
+            if constexpr (requires (const StockTradingActionMessage& msg) { marketStateHandler.onStockTradingAction(msg); })
             {
-                handler.onStockTradingAction(decodeStockTradingActionMessage(message));
+                marketStateHandler.onStockTradingAction(decodeStockTradingActionMessage(message));
             }
             break;
         case MessageType::RegSHORestrictionMessage:
-	        if constexpr (requires (const RegSHORestrictionMessage& msg) { handler.onRegSHORestriction(msg); })
+	        if constexpr (requires (const RegSHORestrictionMessage& msg) { marketStateHandler.onRegSHORestriction(msg); })
 	        {
-	            handler.onRegSHORestriction(decodeRegSHORestrictionMessage(message));
+	            marketStateHandler.onRegSHORestriction(decodeRegSHORestrictionMessage(message));
 	        }
 	        break;
 	    case MessageType::MarketParticipantPositionMessage:
-			if constexpr (requires (const MarketParticipantPositionMessage& msg) { handler.onMarketParticipantPosition(msg); })
+			if constexpr (requires (const MarketParticipantPositionMessage& msg) { marketStateHandler.onMarketParticipantPosition(msg); })
 			{
-				handler.onMarketParticipantPosition(decodeMarketParticipantPositionMessage(message));
+				marketStateHandler.onMarketParticipantPosition(decodeMarketParticipantPositionMessage(message));
 			}
 	        break;
         case MessageType::MWCBDeclineLevelMessage:
-	        if constexpr (requires (const MWCBDeclineLevelMessage& msg) { handler.onMWCBDeclineLevel(msg); })
+	        if constexpr (requires (const MWCBDeclineLevelMessage& msg) { marketStateHandler.onMWCBDeclineLevel(msg); })
 	        {
-	            handler.onMWCBDeclineLevel(decodeMWCBDeclineLevelMessage(message));
+	            marketStateHandler.onMWCBDeclineLevel(decodeMWCBDeclineLevelMessage(message));
 	        }
 	        break;
         case MessageType::MWCBStatusMessage:
-	        if constexpr (requires (const MWCBStatusMessage& msg) { handler.onMWCBStatus(msg); })
+	        if constexpr (requires (const MWCBStatusMessage& msg) { marketStateHandler.onMWCBStatus(msg); })
 	        {
-	            handler.onMWCBStatus(decodeMWCBStatusMessage(message));
+	            marketStateHandler.onMWCBStatus(decodeMWCBStatusMessage(message));
 	        }
 	        break;
         case MessageType::IPOQuotingPeriodUpdateMessage:
-	        if constexpr (requires (const IPOQuotingPeriodUpdateMessage& msg) { handler.onIPOQuotingPeriodUpdate(msg); })
+	        if constexpr (requires (const IPOQuotingPeriodUpdateMessage& msg) { marketStateHandler.onIPOQuotingPeriodUpdate(msg); })
 	        {
-	            handler.onIPOQuotingPeriodUpdate(decodeIPOQuotingPeriodUpdateMessage(message));
+	            marketStateHandler.onIPOQuotingPeriodUpdate(decodeIPOQuotingPeriodUpdateMessage(message));
 	        }
 	        break;
         case MessageType::LULDAuctionCollarMessage:
-	        if constexpr (requires (const LULDAuctionCollarMessage& msg) { handler.onLULDAuctionCollar(msg); })
+	        if constexpr (requires (const LULDAuctionCollarMessage& msg) { marketStateHandler.onLULDAuctionCollar(msg); })
 	        {
-	            handler.onLULDAuctionCollar(decodeLULDAuctionCollarMessage(message));
+	            marketStateHandler.onLULDAuctionCollar(decodeLULDAuctionCollarMessage(message));
 	        }
 	        break;
         case MessageType::OperationalHaltMessage:
-			if constexpr (requires (const OperationalHaltMessage& msg) { handler.onOperationalHalt(msg); })
+			if constexpr (requires (const OperationalHaltMessage& msg) { marketStateHandler.onOperationalHalt(msg); })
 			{
-				handler.onOperationalHalt(decodeOperationalHaltMessage(message));
+				marketStateHandler.onOperationalHalt(decodeOperationalHaltMessage(message));
 			}
 			break;
         case MessageType::AddOrderMessage:
-	        if constexpr (requires (const AddOrderMessage& msg) { handler.onAddOrder(msg); })
+	        if constexpr (requires (const AddOrderMessage& msg) { marketStateHandler.onAddOrder(msg); })
             {
-                handler.onAddOrder(decodeAddOrderMessage(message));
+                marketStateHandler.onAddOrder(decodeAddOrderMessage(message));
             }
 	        break;
         case MessageType::AddOrderMPIDMessage:
-	        if constexpr (requires (const AddOrderMPIDMessage& msg) { handler.onAddOrderMPID(msg); })
+	        if constexpr (requires (const AddOrderMPIDMessage& msg) { marketStateHandler.onAddOrderMPID(msg); })
             {
-                handler.onAddOrderMPID(decodeAddOrderMPIDMessage(message));
+                marketStateHandler.onAddOrderMPID(decodeAddOrderMPIDMessage(message));
             }
 	        break;
         case MessageType::OrderExecutedMessage:
-	        if constexpr (requires (const OrderExecutedMessage& msg) { handler.onOrderExecuted(msg); })
+	        if constexpr (requires (const OrderExecutedMessage& msg) { marketStateHandler.onOrderExecuted(msg); })
             {
-                handler.onOrderExecuted(decodeOrderExecutedMessage(message));
+                marketStateHandler.onOrderExecuted(decodeOrderExecutedMessage(message));
             }
 	        break;
         case MessageType::OrderExecutedWithPriceMessage:
-	        if constexpr (requires (const OrderExecutedWithPriceMessage& msg) { handler.onOrderExecutedWithPrice(msg); })
+	        if constexpr (requires (const OrderExecutedWithPriceMessage& msg) { marketStateHandler.onOrderExecutedWithPrice(msg); })
             {
-                handler.onOrderExecutedWithPrice(decodeOrderExecutedWithPriceMessage(message));
+                marketStateHandler.onOrderExecutedWithPrice(decodeOrderExecutedWithPriceMessage(message));
             }
 	        break;
         case MessageType::OrderCancelMessage:
-	        if constexpr (requires (const OrderCancelMessage& msg) { handler.onOrderCancelled(msg); })
+	        if constexpr (requires (const OrderCancelMessage& msg) { marketStateHandler.onOrderCancelled(msg); })
             {
-                handler.onOrderCancelled(decodeOrderCancelMessage(message));
+                marketStateHandler.onOrderCancelled(decodeOrderCancelMessage(message));
             }
 	        break;
         case MessageType::OrderDeleteMessage:
-	        if constexpr (requires (const OrderDeleteMessage& msg) { handler.onOrderDelete(msg); })
+	        if constexpr (requires (const OrderDeleteMessage& msg) { marketStateHandler.onOrderDelete(msg); })
             {
-                handler.onOrderDelete(decodeOrderDeleteMessage(message));
+                marketStateHandler.onOrderDelete(decodeOrderDeleteMessage(message));
             }
 	        break;
         case MessageType::OrderReplaceMessage:
-	        if constexpr (requires (const OrderReplaceMessage& msg) { handler.onOrderReplace(msg); })
+	        if constexpr (requires (const OrderReplaceMessage& msg) { marketStateHandler.onOrderReplace(msg); })
             {
-                handler.onOrderReplace(decodeOrderReplaceMessage(message));
+                marketStateHandler.onOrderReplace(decodeOrderReplaceMessage(message));
             }
 	        break;
         case MessageType::TradeMessage:
-	        if constexpr (requires (const TradeMessage& msg) { handler.onTrade(msg); })
+	        if constexpr (requires (const TradeMessage& msg) { marketStateHandler.onTrade(msg); })
             {
-                handler.onTrade(decodeTradeMessage(message));
+                marketStateHandler.onTrade(decodeTradeMessage(message));
             }
 	        break;
         case MessageType::CrossTradeMessage:
-	        if constexpr (requires (const CrossTradeMessage& msg) { handler.onCrossTrade(msg); })
+	        if constexpr (requires (const CrossTradeMessage& msg) { marketStateHandler.onCrossTrade(msg); })
             {
-                handler.onCrossTrade(decodeCrossTradeMessage(message));
+                marketStateHandler.onCrossTrade(decodeCrossTradeMessage(message));
             }
 	        break;
         case MessageType::BrokenTradeMessage:
-	        if constexpr (requires (const BrokenTradeMessage& msg) { handler.onBrokenTrade(msg); })
+	        if constexpr (requires (const BrokenTradeMessage& msg) { marketStateHandler.onBrokenTrade(msg); })
             {
-                handler.onBrokenTrade(decodeBrokenTradeMessage(message));
+                marketStateHandler.onBrokenTrade(decodeBrokenTradeMessage(message));
             }
 	        break;
         case MessageType::NOIIMessage:
-			if constexpr (requires (const NOIIMessage& msg) { handler.onNOII(msg); })
+			if constexpr (requires (const NOIIMessage& msg) { marketStateHandler.onNOII(msg); })
 			{
-				handler.onNOII(decodeNOIIMessage(message));
+				marketStateHandler.onNOII(decodeNOIIMessage(message));
 			}
 			break;
         case MessageType::RetailPriceImprovementMessage:
-			if constexpr (requires (const RetailPriceImprovementMessage& msg) { handler.onRetailPriceImprovement(msg); })
+			if constexpr (requires (const RetailPriceImprovementMessage& msg) { marketStateHandler.onRetailPriceImprovement(msg); })
 			{
-				handler.onRetailPriceImprovement(decodeRetailPriceImprovementMessage(message));
+				marketStateHandler.onRetailPriceImprovement(decodeRetailPriceImprovementMessage(message));
 			}
 			break;
         case MessageType::DirectListingCapitalRaiseMessage:
-			if constexpr (requires (const DirectListingCapitalRaiseMessage& msg) { handler.onDirectListingCapitalRaise(msg); })
+			if constexpr (requires (const DirectListingCapitalRaiseMessage& msg) { marketStateHandler.onDirectListingCapitalRaise(msg); })
 			{
-				handler.onDirectListingCapitalRaise(decodeDirectListingCapitalRaiseMessage(message));
+				marketStateHandler.onDirectListingCapitalRaise(decodeDirectListingCapitalRaiseMessage(message));
 			}
 			break;
         default:

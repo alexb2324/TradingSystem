@@ -6,7 +6,6 @@
 // Message type S
 void MarketState::onSystemEvent(const SystemEventMessage& message)
 {
-    //std::println("System Event");
 }
 
 // Message type R
@@ -18,49 +17,41 @@ void MarketState::onStockDirectory(const StockDirectoryMessage& message)
 // Message type H
 void MarketState::onStockTradingAction(const StockTradingActionMessage& message)
 {
-    //std::println("Stock Trading Action");
 }
 
 // Message type Y
 void MarketState::onRegSHORestriction(const RegSHORestrictionMessage& message)
 {
-    //std::println("RegSHORestriction");
 }
 
 // Message type L
 void MarketState::onMarketParticipantPosition(const MarketParticipantPositionMessage& message)
 {
-    //std::println("Market Participant Position");
 }
 
 // Message type V
 void MarketState::onMWCBDeclineLevel(const MWCBDeclineLevelMessage& message)
 {
-    //std::println("MWCB Decline Level");
 }
 
 // Message type W
 void MarketState::onMWCBStatus(const MWCBStatusMessage& message)
 {
-    //std::println("MWCB Status");
 }
 
 // Message type K
 void MarketState::onIPOQuotingPeriodUpdate(const IPOQuotingPeriodUpdateMessage& message)
 {
-    //std::println("IPOQuotingPeriodUpdate");
 }
 
 // Message type J
 void MarketState::onLULDAuctionCollar(const LULDAuctionCollarMessage& message)
 {
-    //std::println("LULDAuction Collar");
 }
 
 // Message type h
 void MarketState::onOperationalHalt(const OperationalHaltMessage& message)
 {
-    //std::println("Operational halt");
 }
 
 // Message type A
@@ -149,7 +140,6 @@ void MarketState::onTrade(const TradeMessage& message)
         .tradeType = TradeType::Trade,
         .side = static_cast<char>(message.buySellIndicator)
     });
-    //tradeBook_.printTrade(tradeBook_.lastTrade());
 }
 
 // Message type Q
@@ -164,7 +154,6 @@ void MarketState::onCrossTrade(const CrossTradeMessage& message)
         .tradeType = TradeType::CrossTrade,
         .crossType = message.crossType
     });
-    //tradeBook_.printTrade(tradeBook_.lastTrade());
 }
 
 // Message type B
@@ -179,19 +168,16 @@ void MarketState::onBrokenTrade(const BrokenTradeMessage& message)
 // Message type I
 void MarketState::onNOII(const NOIIMessage& message)
 {
-    //std::println("NOII");
 }
 
 // Message type N
 void MarketState::onRetailPriceImprovement(const RetailPriceImprovementMessage& message)
 {
-    //std::println("RetailPriceImprovement");
 }
 
 // Message type O
 void MarketState::onDirectListingCapitalRaise(const DirectListingCapitalRaiseMessage& message)
 {
-    //std::println("DirectListingCapitalRaise");
 }
 
 void MarketState::fillSnapshot(std::optional<itch::StockLocate> stockLocate, ConsoleSnapshotMessage& snapshotMessage) const

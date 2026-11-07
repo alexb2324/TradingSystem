@@ -19,18 +19,6 @@ public:
     Tradebook& operator=(Tradebook&& other) = delete;
     ~Tradebook() = default;
 
-
-    void printTrade(const Trade& trade)
-    {
-        std::println("Trade type - {}, Timestamp - {}, Trade Number - {}, Shares - {}, Price - {}, stockLocate - {}",
-            static_cast<char>(trade.tradeType),
-            trade.timestamp,
-            trade.matchNumber,
-            trade.shares,
-            trade.price,
-            trade.stockLocate);
-    }
-
     [[nodiscard]] Trade& lastTrade() { return tradeTape_.back(); }
     [[nodiscard]] std::size_t size() const noexcept { return tradeTape_.size(); }
     void recordTrade(const Trade& trade) { tradeTape_.push_back(trade); }

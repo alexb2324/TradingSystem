@@ -13,11 +13,13 @@
 
 using namespace std::chrono_literals;
 
+
+template<typename Engine>
 class FeedHandler
 {
 public:
 
-    FeedHandler(const std::string& address, const std::uint16_t port, BookEngine& engine)
+    FeedHandler(const std::string& address, const std::uint16_t port, Engine& engine)
     :   receiver_ {address, port},
         engine_ { engine }
     { }
@@ -102,7 +104,7 @@ public:
 
 private:
     UdpReceiver receiver_;
-    BookEngine& engine_;
+    Engine& engine_;
     std::uint64_t expectedSequenceNumber_ { 1 };
     std::array<char, Constants::kMoldSessionIdSize> session_ {'H', 'e', 'l', 'l', 'o', 'T', 'h', 'e', 'r', 'e'};
     std::size_t badPackets_ {};

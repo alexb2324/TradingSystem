@@ -6,9 +6,7 @@ set(CMAKE_CXX_STANDARD 23)
 add_executable(OrderbookEngine src/apps/engine.cpp
         src/parser/Decode.cpp
         src/parser/Decode.h
-        src/parser/Dispatch.cpp
         src/parser/Dispatch.h
-        src/parser/Messages.cpp
         src/parser/Messages.h
         src/orderbook/Orderbook.cpp
         src/orderbook/Orderbook.h
@@ -35,6 +33,9 @@ add_executable(OrderbookEngine src/apps/engine.cpp
         libs/rigtorp/Seqlock.h
         src/BookEngine/BookEngine.cpp
         src/BookEngine/BookEngine.h
+        benchmarks/LatencyHistogram.h
+        benchmarks/BenchmarkUtil.h
+        benchmarks/MessageLatency.h
 )
 
 add_executable(FeedReplay src/apps/feed_sim.cpp
