@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../Usings.h"
+#include "types/ItchTypes.h"
+#include "types/MarketTypes.h"
 
 enum class TradeType : char
 {
@@ -15,7 +16,7 @@ struct Trade
 	itch::Timestamp		timestamp {};
 	itch::MatchNumber	matchNumber {};
 	itch::Shares		shares {};
-	orderbook::Price	price {};
+	market::Price		price {};
 	itch::StockLocate	stockLocate {};
 	TradeType			tradeType {};
 	char				side {};

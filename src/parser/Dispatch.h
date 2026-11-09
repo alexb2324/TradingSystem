@@ -1,18 +1,13 @@
 #pragma once
 
-#include <fstream>
 #include "Decode.h"
 #include "Messages.h"
-#include "../Constants.h"
-
-#include "../marketstate/MarketState.h"
-
-#include <cstdio>
-
+#include "configs/ItchConfigs.h"
+#include "../market_state/MarketState.h"
 
 inline void dispatch(itch::Bytes message, MarketState& marketStateHandler)
 {
-	if (!Constants::kItchMessageLengthsMap.contains(static_cast<char>(message[0])))
+	if (!itch::configs::kItchMessageLengthsMap.contains(static_cast<char>(message[0])))
 	{
 		marketStateHandler.badMessage();
 	}

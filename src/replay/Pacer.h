@@ -38,7 +38,7 @@ public:
 	}
 
 private:
-	std::uint32_t playbackSpeed_ {1};
+	std::uint32_t playbackSpeed_ { 1 };
 	std::uint64_t startAt_ {};
 	std::uint64_t exchangeStartTime_ {};
 	Timepoint wallStartTime_;

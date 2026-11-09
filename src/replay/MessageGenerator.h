@@ -6,8 +6,7 @@
 
 #include "../parser/Decode.h"
 
-#include "../Constants.h"
-#include "../Usings.h"
+#include "configs/ItchConfigs.h"
 
 
 struct SourceMessage
@@ -45,18 +44,18 @@ private:
     {
         nextMessage_.reset();
 
-        if (currentOffset_ + Constants::kItchMessageOffset > fileData_.size()) { return; }
+        if (currentOffset_ + itch::configs::kItchMessageOffset > fileData_.size()) { return; }
 
         const auto msgLength = convertBLEndian<itch::MessageLength>(fileData_.data() + currentOffset_);
 
-        if (currentOffset_ + Constants::kItchMessageOffset + msgLength > fileData_.size()) { return; }
+        if (currentOffset_ + itch::configs::kItchMessageOffset + msgLength > fileData_.size()) { return; }
         if (msgLength == 0) { return; }
 
-        nextMessage_ = {.bytes = fileData_.subspan(currentOffset_, Constants::kItchMessageOffset + msgLength),
-            .timestamp = convertBLEndian48(fileData_.data() + currentOffset_ + Constants::kItchMessageOffset + 5),
+        nextMessage_ = {.bytes = fileData_.subspan(currentOffset_, itch::configs::kItchMessageOffset + msgLength),
+            .timestamp = convertBLEndian48(fileData_.data() + currentOffset_ + itch::configs::kItchMessageOffset + 5),
             .sequenceNumber = sequenceNumber_};
 
-        currentOffset_ += Constants::kItchMessageOffset + msgLength;
+        currentOffset_ += itch::configs::kItchMessageOffset + msgLength;
         ++sequenceNumber_;
     }
 

@@ -4,9 +4,7 @@
 #include <iterator>
 #include <string>
 
-#include "../tradebook/Tradebook.h"
-#include "../Usings.h"
-#include "../../libs/rigtorp/Seqlock.h"
+#include "../../third_party/rigtorp/Seqlock.h"
 #include "ConsoleSnapshotMessage.h"
 
 class ConsoleRenderer
@@ -72,8 +70,8 @@ public:
         return outputString;
     }
 
-    static std::string formatPriceHeader(orderbook::Price p) { return std::format("{}.{:02}", p / 10'000, (p % 10'000) / 100); }
-    static std::string formatPrice(orderbook::Price p) { return std::format("{}.{:04}", p / 10'000, p % 10'000); }
+    static std::string formatPriceHeader(market::Price p) { return std::format("{}.{:02}", p / 10'000, (p % 10'000) / 100); }
+    static std::string formatPrice(market::Price p) { return std::format("{}.{:04}", p / 10'000, p % 10'000); }
     static std::string formatTime(itch::Timestamp ns)
     {
         const auto s = ns / 1'000'000'000;

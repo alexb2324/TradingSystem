@@ -1,7 +1,9 @@
-#include "Messages.h"
-#include "Decode.h"
 #include <iostream>
 #include <algorithm>
+
+#include "Messages.h"
+#include "Decode.h"
+#include "types/ItchTypes.h"
 
 
 SystemEventMessage decodeSystemEventMessage(const itch::Bytes message)

@@ -3,7 +3,8 @@
 #include <cstdint>
 #include <array>
 
-#include "../Usings.h"
+#include "types/ItchTypes.h"
+
 
 enum class MessageType : char
 {
@@ -50,10 +51,6 @@ enum class Side : char
     Sell = 'S'
 };
 
-// ---------------------------------------------------
-// System Event
-// ---------------------------------------------------
-
 
 // Message type 'S', payload length: 12 bytes
 struct SystemEventMessage
@@ -63,17 +60,11 @@ struct SystemEventMessage
 };
 
 
-// ---------------------------------------------------
-// Stock Related
-// ---------------------------------------------------
-
-
 // Message type 'R', payload length: 39 bytes
-
 struct StockDirectoryMessage
 {
     Header header;
-    Symbol stock;
+    itch::Symbol stock;
     std::uint32_t roundLotSize;
     std::uint32_t etpLeverageFactor;
     std::array<char, 2> issueSubType;
@@ -94,7 +85,7 @@ struct StockDirectoryMessage
 struct StockTradingActionMessage
 {
     Header header;
-    Symbol stock;
+    itch::Symbol stock;
     std::array<char, 4> tradingActionReason;
     char tradingState;
     char reserved;
@@ -105,7 +96,7 @@ struct StockTradingActionMessage
 struct RegSHORestrictionMessage
 {
     Header header;
-    Symbol stock;
+    itch::Symbol stock;
     char regSHOAction;
 };
 
@@ -113,7 +104,7 @@ struct RegSHORestrictionMessage
 struct MarketParticipantPositionMessage
 {
     Header header;
-    Symbol stock;
+    itch::Symbol stock;
     std::array<char, 4> mpid;
     char primaryMarketMaker;
     char marketMakerMode;
@@ -140,7 +131,7 @@ struct MWCBStatusMessage
 struct IPOQuotingPeriodUpdateMessage
 {
     Header header;
-    Symbol stock;
+    itch::Symbol stock;
     std::uint32_t ipoQuotationReleaseTime;
     std::uint32_t ipoPrice;
     char ipoQuotationReleaseQualifier;
@@ -150,7 +141,7 @@ struct IPOQuotingPeriodUpdateMessage
 struct LULDAuctionCollarMessage
 {
     Header header;
-    Symbol stock;
+    itch::Symbol stock;
     std::uint32_t auctionCollarReferencePrice;
     std::uint32_t upperAuctionCollarPrice;
     std::uint32_t lowerAuctionCollarPrice;
@@ -161,15 +152,11 @@ struct LULDAuctionCollarMessage
 struct OperationalHaltMessage
 {
     Header header;
-    Symbol stock;
+    itch::Symbol stock;
     char marketCode;
     char operationalHaltAction;
 };
 
-
-// ---------------------------------------------------
-// Add Order
-// ---------------------------------------------------
 
 // Message type 'A', payload length: 36 bytes
 // Stock removed, lookup stock locate
@@ -194,9 +181,6 @@ struct AddOrderMPIDMessage
     Side bSIndicator;
 };
 
-// ---------------------------------------------------
-// Modify Order
-// ---------------------------------------------------
 
 // Message type 'E', payload length: 31 bytes
 struct OrderExecutedMessage {
@@ -239,17 +223,13 @@ struct OrderReplaceMessage {
 };
 
 
-// ---------------------------------------------------
-// Trade
-// ---------------------------------------------------
-
 // Message type 'P', payload length: 44 bytes
 // Stock removed, lookup stock locate
 struct TradeMessage {
     Header header;
     std::uint64_t orderReferenceNumber{};
     std::uint64_t matchNumber{};
-    Symbol stock{};
+    itch::Symbol stock{};
     std::uint32_t shares{};
     std::uint32_t price{};
     Side buySellIndicator{};
@@ -261,7 +241,7 @@ struct CrossTradeMessage {
     Header header;
     std::uint64_t shares{};
     std::uint64_t matchNumber{};
-    Symbol stock{};
+    itch::Symbol stock{};
     std::uint32_t crossPrice{};
     char crossType{};
 };
@@ -272,9 +252,6 @@ struct BrokenTradeMessage {
     std::uint64_t matchNumber{};
 };
 
-// ---------------------------------------------------
-// Net Order Imbalance Indicator
-// ---------------------------------------------------
 
 // Message type 'I', payload length: 50 bytes
 // Stock removed, lookup stock locate
@@ -290,9 +267,6 @@ struct NOIIMessage {
     char priceVariationIndicator{};
 };
 
-// ---------------------------------------------------
-// Retail Price Improvement Indicator
-// ---------------------------------------------------
 
 // Message type 'N', payload length: 20 bytes
 // Stock removed, lookup stock locate
@@ -301,9 +275,6 @@ struct RetailPriceImprovementMessage {
     char interestFlag{};
 };
 
-// ---------------------------------------------------
-// Direct Listing with Capital Raise Price Discovery
-// ---------------------------------------------------
 
 // Message type 'O', payload length: 48 bytes
 // Stock removed, lookup stock locate
@@ -317,33 +288,3 @@ struct DirectListingCapitalRaiseMessage {
     std::uint32_t upperPriceRangeCollar{};
     char openEligibilityStatus{};
 };
-
-
-void printSystemEventMessage(const SystemEventMessage& msg);
-
-void printStockDirectoryMessage(const StockDirectoryMessage& msg);
-void printStockTradingActionMessage(const StockTradingActionMessage& msg);
-void printRegSHORestrictionMessage(const RegSHORestrictionMessage& msg);
-void printMarketParticipantPositionMessage(const MarketParticipantPositionMessage& msg);
-void printMWCBDeclineLevelMessage(const MWCBDeclineLevelMessage& msg);
-void printMWCBStatusMessage(const MWCBStatusMessage& msg);
-void printIPOQuotingPeriodUpdateMessage(const IPOQuotingPeriodUpdateMessage& msg);
-void printLULDAuctionCollarMessage(const LULDAuctionCollarMessage& msg);
-void printOperationalHaltMessage(const OperationalHaltMessage& msg);
-
-void printAddOrderMessage(const AddOrderMessage& msg);
-void printAddOrderMPIDMessage(const AddOrderMPIDMessage& msg);
-
-void printOrderExecutedMessage(const OrderExecutedMessage& msg);
-void printOrderExecutedWithPriceMessage(const OrderExecutedWithPriceMessage& msg);
-void printOrderCancelMessage(const OrderCancelMessage& msg);
-void printOrderDeleteMessage(const OrderDeleteMessage& msg);
-void printOrderReplaceMessage(const OrderReplaceMessage& msg);
-
-void printTradeMessage(const TradeMessage& msg);
-void printCrossTradeMessage(const CrossTradeMessage& msg);
-void printBrokenTradeMessage(const BrokenTradeMessage& msg);
-
-void printNOIIMessage(const NOIIMessage& msg);
-void printRetailPriceImprovementMessage(const RetailPriceImprovementMessage& msg);
-void printDirectListingCapitalRaiseMessage(const DirectListingCapitalRaiseMessage& msg);

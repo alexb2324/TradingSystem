@@ -3,13 +3,12 @@
 #include <print>
 #include <thread>
 #include <chrono>
-#include <cmath>
 
-#include "MoldUDP64Encoder.h"
+#include "../protocol/moldudp64/MoldUDP64Encoder.h"
 #include "MessageGenerator.h"
-#include "UdpSender.h"
+#include "../network/UdpSender.h"
 #include "Pacer.h"
-#include "../datasource/filesource/FileSource.h"
+#include "../data_source/filesource/FileSource.h"
 
 using namespace std::chrono_literals;
 
@@ -19,12 +18,10 @@ class FeedSimulator
 public:
     FeedSimulator(const std::filesystem::path& filePath, const std::string& address, std::uint16_t port, std::uint32_t playbackSpeed, std::uint64_t replayStartTime)
     :   fileSource_ { filePath },
-        messageSource_ {fileSource_.bytes() },
+        messageSource_ { fileSource_.bytes() },
         pacer_ { playbackSpeed, replayStartTime },
-        udpSender_ {address, port}
-    {
-        std::println("Mapped file successfully.");
-    }
+        udpSender_ { address, port }
+    { }
 
     void run()
     {

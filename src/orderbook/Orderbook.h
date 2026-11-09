@@ -1,40 +1,44 @@
 #pragma once
 
 #include <map>
+#include <functional>
 
-#include "../Usings.h"
 #include "OrderbookLevel.h"
+#include "types/MarketTypes.h"
 
 class Orderbook     // Per Stock: L2 Price Levels
 {
 public:
 
+    using BidLevels = std::map<market::Price, OrderbookLevel, std::greater<>>;
+    using AskLevels = std::map<market::Price, OrderbookLevel, std::less<>>;
+
     Orderbook() = default;
+
     Orderbook(const Orderbook& other) = delete;
-    void operator=(const Orderbook& other) = delete;
+    Orderbook& operator=(const Orderbook& other) = delete;
     Orderbook(Orderbook&& other) = delete;
-    void operator=(Orderbook&& other) = delete;
+    Orderbook& operator=(Orderbook&& other) = delete;
+
     ~Orderbook() = default;
 
-    void addOrder(orderbook::Side side, orderbook::Price price, orderbook::Quantity quantity)
+    void addOrder(market::Side side, market::Price price, market::Quantity quantity)
     {
-        side == orderbook::Side::Buy ? addOrderToLevel(bids_, price, quantity) : addOrderToLevel(asks_, price, quantity);
+        side == market::Side::Buy ? addOrderToLevel(bids_, price, quantity) : addOrderToLevel(asks_, price, quantity);
     }
 
-    void reduce(orderbook::Side side, orderbook::Price price, orderbook::Quantity quantity, bool orderRemoved)
+    void reduce(market::Side side, market::Price price, market::Quantity quantity, bool orderRemoved)
     {
-        side == orderbook::Side::Buy ? reduceLevel(bids_, price, quantity, orderRemoved) : reduceLevel(asks_, price, quantity, orderRemoved);
+        side == market::Side::Buy ? reduceLevel(bids_, price, quantity, orderRemoved) : reduceLevel(asks_, price, quantity, orderRemoved);
     }
 
-    [[nodiscard]] const auto& bids() const { return bids_; }
-    [[nodiscard]] const auto& asks() const { return asks_; }
-
-    //[[nodiscard]] std::size_t size() const noexcept { return bids_.size() + asks_.size(); }
+    [[nodiscard]] const BidLevels& bids() const noexcept { return bids_; }
+    [[nodiscard]] const AskLevels& asks() const noexcept { return asks_; }
 
 private:
 
     template <typename Map>
-    void addOrderToLevel(Map& orderbookSide, orderbook::Price price, orderbook::Quantity quantity)
+    void addOrderToLevel(Map& orderbookSide, market::Price price, market::Quantity quantity)
     {
         OrderbookLevel& level = orderbookSide[price];
         level.totalShares += quantity;
@@ -42,7 +46,7 @@ private:
     };
 
     template <typename Map>
-    void reduceLevel(Map& orderbookSide, orderbook::Price price, orderbook::Quantity quantity, bool orderRemoved)
+    void reduceLevel(Map& orderbookSide, market::Price price, market::Quantity quantity, bool orderRemoved)
     {
         auto it = orderbookSide.find(price);
         if (it == orderbookSide.end()) { return; }
@@ -53,7 +57,6 @@ private:
     }
 
 private:
-
-    std::map<orderbook::Price, OrderbookLevel, std::greater<>> bids_;
-    std::map<orderbook::Price, OrderbookLevel, std::less<>> asks_;
+    BidLevels bids_;
+    AskLevels asks_;
 };

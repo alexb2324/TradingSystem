@@ -1,18 +1,18 @@
 #pragma once
 
-#include "../Usings.h"
+#include "types/MarketTypes.h"
 
 struct Order
 {
-    Order(orderbook::Quantity quantity, orderbook::Price price, orderbook::Side side, itch::StockLocate stockLocate)
+    Order(market::Quantity quantity, market::Price price, market::Side side, itch::StockLocate stockLocate)
         : quantity { quantity }
         , price { price }
         , stockLocate { stockLocate }
         , side { side }
     { }
 
-    orderbook::Quantity quantity;
-    orderbook::Price price;
+    market::Quantity quantity;
+    market::Price price;
     itch::StockLocate stockLocate;
-    orderbook::Side side;
+    market::Side side;
 };

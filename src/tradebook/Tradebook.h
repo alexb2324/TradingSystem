@@ -2,17 +2,15 @@
 
 #include <vector>
 #include <cstddef>
-#include <print>
-#include <utility>
 
 #include "Trade.h"
-#include "../Constants.h"
+#include "configs/MarketConfigs.h"
 
 class Tradebook
 {
 public:
 
-    Tradebook() { tradeTape_.reserve(Constants::kReserveDailyTradeCount); }
+    Tradebook() { tradeTape_.reserve(market::configs::kTradeBookReserveDailyTradeCount); }
     Tradebook(const Tradebook& other) = delete;
     Tradebook& operator=(const Tradebook& other) = delete;
     Tradebook(Tradebook&& other) = delete;

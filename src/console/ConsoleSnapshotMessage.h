@@ -7,7 +7,7 @@
 struct SnapshotLevel
 {
     std::uint64_t totalShares {};
-    orderbook::Price price {};
+    market::Price price {};
     std::uint32_t orderCount {};
 };
 
