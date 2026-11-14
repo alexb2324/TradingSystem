@@ -2,7 +2,7 @@
 #include <cstdint>
 
 #include "LatencyHistogram.h"
-#include "../src/Constants.h"
+#include "configs/ItchConfigs.h"
 
 struct NoTiming
 {
@@ -12,43 +12,49 @@ struct NoTiming
 
 class MessageLatency
 {
+    static constexpr std::array<double, 5> percentiles_ {50.0, 90.0, 99.0, 99.90, 99.99};
+
 public:
     static constexpr bool kEnabled { true };
+
     void record(std::uint8_t type, std::uint64_t cycles) noexcept
     {
-        allLatency_.record(cycles);
-        messageLatencyHistogram_[slot(type)].record(cycles);
+        overallHistogram_.record(cycles);
+        messageLatencyHistograms_[slot(type)].record(cycles);
     }
 
-    void reportAll(double nsPerCycle) const
+    void reportOverall(double nsPerCycle) const
     {
-
         std::println("Overall Results");
-        std::println("-------------------");
-        for (double p : {50.0, 90.0, 99.0, 99.90, 99.99})
+        std::println("--------------------------------");
+        for (double p : percentiles_)
         {
-            std::println("p{:<6} {}", p, formatLatencyNumbers(allLatency_.percentile(p) * nsPerCycle));
+            std::println("{:<14} {:>14} ns", std::format("p{}", p), formatNumberWithCommas(overallHistogram_.cyclesByPercentile(p) * nsPerCycle));
         }
-        std::println("max{:<4} {}   (count = {})", " ", formatLatencyNumbers(allLatency_.max() * nsPerCycle), formatNumberWithCommas(allLatency_.count()));
+        std::println("{:<14} {:>14} ns", "max", formatNumberWithCommas(overallHistogram_.maxSamples() * nsPerCycle));
+        std::println("--------------------------------");
+        std::println("{:<14}    {:>14}", "Total Samples", formatNumberWithCommas(overallHistogram_.totalSamples()));
         std::println();
     }
 
     void reportEachMessageLatency(double nsPerCycle) const
     {
-        for (const auto& [messageType, size] : Constants::kItchMessageLengthsMap)
+        for (const auto& [messageType, size] : itch::configs::kItchMessageLengthsMap)
         {
-            const auto& histogram = messageLatencyHistogram_[slot(messageType)];
+            const auto& histogram = messageLatencyHistograms_[slot(messageType)];
 
-            if (histogram.count() == 0) { continue; }
+            if (histogram.totalSamples() == 0) { continue; }
 
             std::println("Message Type: {}", messageType);
-            std::println("-------------------");
+            std::println("--------------------------------");
 
-            for (double p : {50.0, 90.0, 99.0, 99.90, 99.99})
+            for (double p : percentiles_)
             {
-                std::println("p{:<6} {}", p, formatLatencyNumbers(histogram.percentile(p) * nsPerCycle));
+                std::println("{:<14} {:>14} ns", std::format("p{}", p), formatNumberWithCommas(histogram.cyclesByPercentile(p) * nsPerCycle));
             }
-            std::println("max{:<4} {}   (count = {})", " ", formatLatencyNumbers(histogram.max() * nsPerCycle), formatNumberWithCommas(histogram.count()));
+            std::println("{:<14} {:>14} ns", "max", formatNumberWithCommas(histogram.maxSamples() * nsPerCycle));
+            std::println("--------------------------------");
+            std::println("{:<14}    {:>14}", "Total Samples", formatNumberWithCommas(histogram.totalSamples()));
             std::println();
         }
     }
@@ -62,21 +68,6 @@ private:
         return 52;
     }
 
-    static std::string formatLatencyNumbers(double nanoseconds)
-    {
-        if (nanoseconds >= 1'000'000.0)
-        {
-            return std::format("{:>8.2f} ms", nanoseconds / 1'000'000.0);
-        }
-
-        if (nanoseconds >= 1'000.0)
-        {
-            return std::format("{:>8.2f} us", nanoseconds / 1'000.0);
-        }
-
-        return std::format("{:>8.2f} ns", nanoseconds);
-    }
-
     static std::string formatNumberWithCommas(std::size_t value)
     {
         std::string result = std::to_string(value);
@@ -88,6 +79,6 @@ private:
         return result;
     }
 
-    LatencyHistogram allLatency_ {};
-    std::array<LatencyHistogram, 53> messageLatencyHistogram_ {};
+    LatencyHistogram overallHistogram_ {};
+    std::array<LatencyHistogram, 53> messageLatencyHistograms_ {};
 };

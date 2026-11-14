@@ -10,26 +10,26 @@ class LatencyHistogram {
     static constexpr std::size_t kBuckets = (64 - kSubBits + 1) * kSub;
 
 public:
-    void record(std::uint64_t value) noexcept
+    void record(std::uint64_t cycles) noexcept
     {
-        ++counts_[index(value)];
-        ++total_;
-        max_ = std::max(max_, value);
+        ++cycleBuckets_[index(cycles)];
+        ++totalSamples_;
+        maxCyclesObserved_ = std::max(maxCyclesObserved_, cycles);
     }
 
-    [[nodiscard]] std::uint64_t percentile(double p) const noexcept
+    [[nodiscard]] std::uint64_t cyclesByPercentile(double percentile) const noexcept
     {
-        const auto target = static_cast<std::uint64_t>(p / 100.0 * static_cast<double>(total_));
+        const auto targetSamples = static_cast<std::uint64_t>(percentile / 100.0 * static_cast<double>(totalSamples_));
         std::uint64_t seen = 0;
         for (std::size_t i {}; i < kBuckets; ++i)
         {
-            if ((seen += counts_[i]) > target) { return lowerBound(i); }
+            if ((seen += cycleBuckets_[i]) > targetSamples) { return lowerBound(i); }
         }
-        return max_;
+        return maxCyclesObserved_;
     }
 
-    [[nodiscard]] std::uint64_t count() const noexcept { return total_; }
-    [[nodiscard]] std::uint64_t max() const noexcept { return max_; }
+    [[nodiscard]] std::uint64_t totalSamples() const noexcept { return totalSamples_; }
+    [[nodiscard]] std::uint64_t maxSamples() const noexcept { return maxCyclesObserved_; }
 
 private:
 
@@ -40,15 +40,15 @@ private:
         return ((shift + 1) << kSubBits) + ((value >> shift) & (kSub - 1));
     }
 
-    static std::uint64_t lowerBound(std::size_t i) noexcept
+    static std::uint64_t lowerBound(std::size_t index) noexcept
     {
-        if (i < kSub) { return i; }
-        const int shift = static_cast<int>(i >> kSubBits) - 1;
-        return (kSub + (i & (kSub - 1))) << shift;
+        if (index < kSub) { return index; }
+        const int shift = static_cast<int>(index >> kSubBits) - 1;
+        return (kSub + (index & (kSub - 1))) << shift;
     }
 
-    std::array<std::uint64_t, kBuckets> counts_ {};
-    std::uint64_t total_{}, max_ {};
+    std::array<std::uint64_t, kBuckets> cycleBuckets_ {};
+    std::uint64_t totalSamples_{}, maxCyclesObserved_ {};
 };
 
 
