@@ -159,7 +159,7 @@ void MarketState::onCrossTrade(const CrossTradeMessage& message)
 // Message type B
 void MarketState::onBrokenTrade(const BrokenTradeMessage& message)
 {
-    if (Trade* trade = tradeBook_.findTrade(message.matchNumber))
+    if (auto* trade = tradeBook_.findTrade(message.matchNumber))
     {
         trade->broken = true;
     }
@@ -182,6 +182,7 @@ void MarketState::onDirectListingCapitalRaise(const DirectListingCapitalRaiseMes
 
 void MarketState::fillSnapshot(std::optional<itch::StockLocate> stockLocate, ConsoleSnapshotMessage& snapshotMessage) const
 {
+    /*
     snapshotMessage.messages = messages_;
     snapshotMessage.liveOrders = market_.liveOrders();
     snapshotMessage.exchangeTime = lastTimestamp_;
@@ -218,5 +219,5 @@ void MarketState::fillSnapshot(std::optional<itch::StockLocate> stockLocate, Con
         {
             snapshotMessage.recentTrades[snapshotMessage.tradeCount++] = *it;
         }
-    }
+    }*/
 }

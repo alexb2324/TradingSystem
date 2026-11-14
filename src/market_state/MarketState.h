@@ -49,7 +49,12 @@ public:
 	void onRetailPriceImprovement(const RetailPriceImprovementMessage& message);
 	void onDirectListingCapitalRaise(const DirectListingCapitalRaiseMessage& message);
 
-	void noteMessage(itch::Timestamp ts) noexcept { ++messages_; lastTimestamp_ = ts; }
+	void noteMessage(itch::Timestamp ts) noexcept
+	{
+		++messages_;
+		lastTimestamp_ = ts;
+	}
+
 	void badMessage() noexcept { ++badMessages_; }
 
 	[[nodiscard]] std::uint64_t   messageCount()  const noexcept { return messages_; }
