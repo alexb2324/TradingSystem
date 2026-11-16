@@ -23,7 +23,7 @@ public:
         messageLatencyHistograms_[slot(type)].record(cycles);
     }
 
-    void reportOverall(double nsPerCycle) const
+    void printOverall(double nsPerCycle) const
     {
         std::println("Overall Results");
         std::println("--------------------------------");
@@ -37,7 +37,7 @@ public:
         std::println();
     }
 
-    void reportEachMessageLatency(double nsPerCycle) const
+    void printEachMessageLatency(double nsPerCycle) const
     {
         for (const auto& [messageType, size] : itch::configs::kItchMessageLengthsMap)
         {

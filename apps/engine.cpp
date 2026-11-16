@@ -18,13 +18,13 @@
 #include "../src/book_engine/BookEngine.h"
 #include "../third_party/rigtorp/Seqlock.h"
 
-#include "../benchmarks/LatencyHistogram.h"
+#include "configs/ItchConfigs.h"
+
 #include "../benchmarks/BenchmarkUtil.h"
 
 using Clock = std::chrono::steady_clock;
 
-
-static std::string formatNumber(std::size_t value)
+static std::string formatNumberWithCommas(std::size_t value)
 {
     std::string result = std::to_string(value);
 
@@ -33,6 +33,23 @@ static std::string formatNumber(std::size_t value)
         result.insert(static_cast<std::size_t>(i), ",");
     }
     return result;
+}
+
+template <typename Engine>
+static void printTestRunStats(Engine& engine, std::chrono::duration<double> elapsedTime, itch::Bytes fileData, std::size_t readBytes)
+{
+    const auto messages = engine.marketState().messageCount();
+    const double seconds = elapsedTime.count();
+
+    std::println();
+    std::println("------------------------- Results -------------------------");
+    std::println("Processed messages : {}", formatNumberWithCommas(messages));
+    std::println("Processed bytes    : {} / {}{}", formatNumberWithCommas(readBytes), formatNumberWithCommas(fileData.size()),
+                 readBytes == fileData.size() ? "" : "  (WARNING: stopped early, truncated/corrupt tail)");
+    std::println("Processing time    : {:.3f} s", seconds);
+    std::println("Throughput         : {:.2f} M msgs/s, {:.1f} MB/s",
+                 messages / seconds / 1e6, readBytes / seconds / 1e6);
+    std::println("Avg per message    : {:.1f} ns", seconds * 1e9 / static_cast<double>(messages));
 }
 
 // Pin a thread to a core. Returns the pthread error code (0 = success).
@@ -53,118 +70,121 @@ static void pinOrWarn(pthread_t thread, int core, std::string_view name)
     }
 }
 
-static void printUsage(const char* prog)
-{
-    std::println(stderr, "Usage: {} <SYMBOL> PROD", prog);
-    std::println(stderr, "       {} <SYMBOL> TEST <itch-file>", prog);
-}
-
 // Live mode: UDP feed -> BookEngine -> seqlock -> console renderer
-static void runProd(const std::string& symbol)
+static void runProd(const std::string& host, std::uint16_t port, const std::string& symbol, int feedHandlerCore, int rendererCore)
 {
     rigtorp::Seqlock<ConsoleSnapshotMessage> snapshotLock;
-    BookEngine<>                    engine   {symbol, snapshotLock};
-    FeedHandler<BookEngine<>>       feed     {"127.0.0.1", 6969, engine};   // throws here if the socket fails
-    ConsoleRenderer                 renderer {symbol, snapshotLock};
+    prod::BookEngine                    engine   {symbol, snapshotLock};
+    FeedHandler<prod::BookEngine>       feed     {host, port, engine};   // throws here if the socket fails
+    ConsoleRenderer                     renderer {symbol, snapshotLock};
 
-    std::exception_ptr feedError;
-    std::jthread feedThread(&FeedHandler<BookEngine<>>::run, &feed);
+    std::jthread feedThread(&FeedHandler<prod::BookEngine>::run, &feed);
+    /*std::jthread newFeedThread([&]
+    {
+        try { feed.run(); }
+        catch (...) { feedError = std::current_exception(); }
+    });*/
     std::jthread rendererThread(&ConsoleRenderer::run, &renderer);
 
-    pinOrWarn(feedThread.native_handle(), 1, "feed");
-    pinOrWarn(rendererThread.native_handle(), 2, "renderer");
+    pinOrWarn(feedThread.native_handle(), feedHandlerCore, "feedHandler");
+    pinOrWarn(rendererThread.native_handle(), rendererCore, "renderer");
 
     feedThread.join();                // end of session, timeouts or error
     rendererThread.request_stop();
     rendererThread.join();
+}
 
-    if (feedError) { std::rethrow_exception(feedError); }
+
+template <typename Engine>
+static std::size_t processFile(Engine& engine, itch::Bytes fileData)
+{
+    std::size_t readOffset {};
+    while (readOffset + itch::configs::kItchMessageOffset <= fileData.size())
+    {
+        const auto msgLength = convertBLEndian<itch::MessageLength>(fileData.data() + readOffset);
+        if (msgLength == 0) { break; }
+        if (readOffset + itch::configs::kItchMessageOffset + msgLength > fileData.size()) { break; }
+
+        engine.onMessage(fileData.subspan(readOffset + itch::configs::kItchMessageOffset, msgLength));
+
+        readOffset += itch::configs::kItchMessageOffset + msgLength;
+    }
+    return readOffset;
 }
 
 // Benchmark mode: file -> BookEngine as fast as possible, no network
-static void runTest(const std::string& symbol, const std::filesystem::path& fileName)
+static void runTest(const std::filesystem::path& filePath, int engineCoreOpt, bool mapPopulateOpt, bool measureLatencyOpt)
 {
-
-    const std::filesystem::path filePath = std::filesystem::current_path().parent_path() / "res" / fileName;
     if (!std::filesystem::exists(filePath))
     {
         throw std::runtime_error("File not found: " + filePath.string());
     }
 
-    rigtorp::Seqlock<ConsoleSnapshotMessage> snapshotLock;
-    BookEngine<MessageLatency> engine {symbol, snapshotLock};
-
     // Ensure sufficient RAM before trying to fault in all pages
-    FileSource fileSource {filePath, true};
+    if (mapPopulateOpt) { std::println("Pre-faulting all file pages..."); }
+
+    FileSource fileSource {filePath, mapPopulateOpt};
     const auto fileData = fileSource.bytes();
     if (fileData.empty()) { throw std::runtime_error("File is empty: " + filePath.string()); }
 
-    pinOrWarn(pthread_self(), 1, "main");
-    std::println("Processing {} ({} bytes)...", filePath.string(), formatNumber(fileData.size()));
+    pinOrWarn(pthread_self(), engineCoreOpt, "main");
+    std::println("Processing {} ({} bytes)...", filePath.string(), formatNumberWithCommas(fileData.size()));
 
-    std::size_t readOffset {};
-    //const auto startTime = Clock::now();
-
-    while (readOffset + Constants::kItchMessageOffset <= fileData.size())
+    if (measureLatencyOpt)
     {
-        const auto msgLength = convertBLEndian<itch::MessageLength>(fileData.data() + readOffset);
-        if (msgLength == 0) { break; }
-        if (readOffset + Constants::kItchMessageOffset + msgLength > fileData.size()) { break; }
+        const auto startTime = Clock::now();
 
-        engine.onMessage(fileData.subspan(readOffset + Constants::kItchMessageOffset, msgLength));
+        test::BookEngine<MessageLatency> engine {};
+        const auto readBytes = processFile(engine, fileData);
 
-        readOffset += Constants::kItchMessageOffset + msgLength;
+        const std::chrono::duration<double> elapsedTime = Clock::now() - startTime;
+
+        const double nsPerCycle = calibrateNsPerCycle(); // Samples 1'000'000 times for average nsPerCycle
+        engine.timing().printEachMessageLatency(nsPerCycle);
+        engine.timing().printOverall(nsPerCycle);
+
+        printTestRunStats(engine, elapsedTime, fileData, readBytes);
+
     }
+    else
+    {
+        const auto startTime = Clock::now();
 
-    const double nsPerCycle = calibrateNsPerCycle(); // Samples 1'000'000 times for average nsPerCycle
-    engine.timing().reportEachMessageLatency(nsPerCycle);
-    engine.timing().reportAll(nsPerCycle);
-    /*
-    const auto endTime = Clock::now();
+        test::BookEngine engine {};
+        const auto readBytes = processFile(engine, fileData);
 
+        const std::chrono::duration<double> elapsedTime = Clock::now() - startTime;
 
-    const std::chrono::duration<double> elapsed = endTime - startTime;
-    const double seconds  = elapsed.count();
-    const auto   messages = engine.marketState().messageCount();
-
-    std::println("Processed messages : {}", formatNumber(messages));
-    std::println("Processed bytes    : {} / {}{}", formatNumber(readOffset), formatNumber(fileData.size()),
-                 readOffset == fileData.size() ? "" : "  (WARNING: stopped early, truncated/corrupt tail)");
-    std::println("Processing time    : {:.3f} s", seconds);
-    std::println("Throughput         : {:.2f} M msgs/s, {:.1f} MB/s",
-                 messages / seconds / 1e6, readOffset / seconds / 1e6);
-    std::println("Avg per message    : {:.1f} ns", seconds * 1e9 / static_cast<double>(messages));
-    */
+        printTestRunStats(engine, elapsedTime, fileData, readBytes);
+    }
 }
 
 int main(int argc, char* argv[])
 {
-    if (argc < 3) { printUsage(argv[0]); return 1; }
+    const std::string_view mode = argv[1];
 
-    const std::string      symbol = argv[1];
-    const std::string_view mode   = argv[2];
-
-    try
+    if (mode == "LIVE")
     {
-        if (mode == "PROD")
-        {
-            runProd(symbol);
-        }
-        else if (mode == "TEST")
-        {
-            if (argc < 4) { printUsage(argv[0]); return 1; }
-            runTest(symbol, argv[3]);
-        }
-        else
-        {
-            std::println(stderr, "Invalid mode '{}'. Use PROD or TEST.", mode);
-            return 1;
-        }
+        std::string host = argv[3];
+        std::uint16_t port = std::stoi(argv[4]);
+        std::string symbol = argv[5];
+        int engineCore = std::stoi(argv[6]);
+        int rendererCore = std::stoi(argv[7]);
+        runProd(host, port, symbol, engineCore, rendererCore);
     }
-    catch (const std::exception& e)
+    else if (mode == "TEST")
     {
-        std::println(stderr, "Fatal error: {}", e.what());
+        std::filesystem::path file = argv[2];
+        int engineCore = std::stoi(argv[3]);
+        bool measureLatencyFlag = false;
+        bool mapPopulateFlag = true;
+        runTest(file, engineCore, mapPopulateFlag, measureLatencyFlag);
+    }
+    else
+    {
+        std::println(stderr, "Invalid mode '{}'. Use PROD or TEST.", mode);
         return 1;
     }
+
     return 0;
 }

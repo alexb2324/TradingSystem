@@ -27,7 +27,6 @@ add_executable(OrderbookEngine apps/engine.cpp
         src/network/UdpReceiver.h
         src/protocol/moldudp64/MoldUDP64Decoder.h
         src/console/ConsoleSnapshotMessage.h
-        src/orderbook/OrderbookLevel.h
         third_party/rigtorp/Seqlock.h
         src/book_engine/BookEngine.h
         benchmarks/LatencyHistogram.h
@@ -41,6 +40,8 @@ add_executable(OrderbookEngine apps/engine.cpp
         include/configs/NetworkConfigs.h
         include/configs/ConsoleConfigs.h
         include/configs/MarketConfigs.h
+        src/orderbook/MapOrderbook.h
+        src/orderbook/VectorOrderbook.h
 )
 
 target_include_directories(OrderbookEngine PRIVATE

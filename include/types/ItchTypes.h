@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <cstddef>
 #include <span>
 #include <array>
 #include <string_view>
@@ -7,7 +8,7 @@
 namespace itch
 {
 	using MessageLength = std::uint16_t;
-	using Bytes = std::span<const std::uint8_t>;
+	using Bytes = std::span<const std::byte>;
 
 	using Timestamp = std::uint64_t;
 	using StockLocate = std::uint16_t;

@@ -11,7 +11,7 @@ inline void dispatch(itch::Bytes message, MarketState& marketStateHandler)
 	{
 		marketStateHandler.badMessage();
 	}
-
+	
     if constexpr (requires (itch::Timestamp timestamp) { marketStateHandler.noteMessage(timestamp); })
     {
         marketStateHandler.noteMessage(convertBLEndian48(message.data() + 5));

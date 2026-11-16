@@ -48,7 +48,6 @@ public:
         if (pagingFlag)
         {
             mapping = mmap(nullptr, fileSize, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0);
-            std::println("Faulted in all pages!");
         }
         else
         {
@@ -78,10 +77,10 @@ public:
         if (mapping_ != MAP_FAILED) { munmap(mapping_, mappingSize_); }
     }
 
-    [[nodiscard]] std::span<const std::uint8_t> bytes() const noexcept
+    [[nodiscard]] std::span<const std::byte> bytes() const noexcept
     {
         if (mapping_ == MAP_FAILED) { return {}; }
-        return {static_cast<const std::uint8_t*>(mapping_), mappingSize_};
+        return {static_cast<const std::byte*>(mapping_), mappingSize_};
     }
 
 private:

@@ -7,7 +7,7 @@
 #include "types/ItchTypes.h"
 
 template <std::unsigned_integral T>
-[[nodiscard]] static T convertBLEndian(const std::uint8_t* p) noexcept
+[[nodiscard]] static T convertBLEndian(const std::byte* p) noexcept
 {
     T v;
     std::memcpy(&v, p, sizeof(T));
@@ -15,7 +15,7 @@ template <std::unsigned_integral T>
     return v;
 }
 
-[[nodiscard]] static std::uint64_t convertBLEndian48(const std::uint8_t* p) noexcept
+[[nodiscard]] static std::uint64_t convertBLEndian48(const std::byte* p) noexcept
 {
     std::uint64_t v {};
     std::memcpy(&v, p, 6);
@@ -23,7 +23,7 @@ template <std::unsigned_integral T>
 }
 
 template <std::unsigned_integral T>
-void storeBigEndian(std::uint8_t* p, T v) noexcept
+void storeBigEndian(std::byte* p, T v) noexcept
 {
     if constexpr (std::endian::native == std::endian::little) { v = std::byteswap(v); }
     std::memcpy(p, &v, sizeof(T));

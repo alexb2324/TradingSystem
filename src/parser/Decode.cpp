@@ -27,7 +27,7 @@ StockDirectoryMessage decodeStockDirectoryMessage(const itch::Bytes message)
     result.header.stockLocate = convertBLEndian<std::uint16_t>(message.data() + 1);
 
     // Copy stock symbol
-    std::copy_n(message.data() + 11, result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
+    std::copy_n(reinterpret_cast<const char*>(message.data() + 11), result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
 
     result.marketCategory = static_cast<char>(message[19]);
     result.financialStatusIndicator = static_cast<char>(message[20]);
@@ -36,7 +36,7 @@ StockDirectoryMessage decodeStockDirectoryMessage(const itch::Bytes message)
     result.issueClassification = static_cast<char>(message[26]);
 
     // Copy issue sub-type
-    std::copy_n(message.data() + 27, result.issueSubType.size(), result.issueSubType.begin());
+    std::copy_n(reinterpret_cast<const char*>(message.data() + 27), result.issueSubType.size(), result.issueSubType.begin());
     result.authenticity = static_cast<char>(message[29]);
     result.shortSaleThresholdIndicator = static_cast<char>(message[30]);
     result.ipoFlag = static_cast<char>(message[31]);
@@ -58,10 +58,10 @@ StockTradingActionMessage decodeStockTradingActionMessage(const itch::Bytes mess
     result.header.stockLocate = convertBLEndian<std::uint16_t>(message.data() + 1);
 
     // Copy stock symbol
-    std::copy_n(message.data() + 11, result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
+    std::copy_n(reinterpret_cast<const char*>(message.data() + 11), result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
 
     // Copy trading action reason
-    std::copy_n(message.data() + 21, result.tradingActionReason.size(), result.tradingActionReason.begin());
+    std::copy_n(reinterpret_cast<const char*>(message.data() + 21), result.tradingActionReason.size(), result.tradingActionReason.begin());
     result.tradingState = static_cast<char>(message[19]);
     result.reserved = static_cast<char>(message[20]);
 
@@ -77,7 +77,7 @@ RegSHORestrictionMessage decodeRegSHORestrictionMessage(const itch::Bytes messag
     result.header.stockLocate = convertBLEndian<std::uint16_t>(message.data() + 1);
 
     // Copy stock symbol
-    std::copy_n(message.data() + 11, result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
+    std::copy_n(reinterpret_cast<const char*>(message.data() + 11), result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
     result.regSHOAction = static_cast<char>(message[19]);
 
     return result;
@@ -92,10 +92,10 @@ MarketParticipantPositionMessage decodeMarketParticipantPositionMessage(const it
     result.header.stockLocate = convertBLEndian<std::uint16_t>(message.data() + 1);
 
     // Copy MPID
-    std::copy_n(message.data() + 11, result.mpid.size(), result.mpid.begin());
+    std::copy_n(reinterpret_cast<const char*>(message.data() + 11), result.mpid.size(), result.mpid.begin());
 
     // Copy stock symbol
-    std::copy_n(message.data() + 15, result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
+    std::copy_n(reinterpret_cast<const char*>(message.data() + 15), result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
     result.primaryMarketMaker = static_cast<char>(message[23]);
     result.marketMakerMode = static_cast<char>(message[24]);
     result.marketParticipantState = static_cast<char>(message[25]);
@@ -138,7 +138,7 @@ IPOQuotingPeriodUpdateMessage decodeIPOQuotingPeriodUpdateMessage(const itch::By
     result.header.stockLocate = convertBLEndian<std::uint16_t>(message.data() + 1);
 
     // Copy stock symbol
-    std::copy_n(message.data() + 11, result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
+    std::copy_n(reinterpret_cast<const char*>(message.data() + 11), result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
     result.ipoQuotationReleaseTime = convertBLEndian<std::uint32_t>(message.data() + 19);
     result.ipoQuotationReleaseQualifier = static_cast<char>(message[23]);
     result.ipoPrice = convertBLEndian<std::uint32_t>(message.data() + 24);
@@ -155,7 +155,7 @@ LULDAuctionCollarMessage decodeLULDAuctionCollarMessage(const itch::Bytes messag
     result.header.stockLocate = convertBLEndian<std::uint16_t>(message.data() + 1);
 
     // Copy stock symbol
-    std::copy_n(message.data() + 11, result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
+    std::copy_n(reinterpret_cast<const char*>(message.data() + 11), result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
     result.auctionCollarReferencePrice = convertBLEndian<std::uint32_t>(message.data() + 19);
     result.upperAuctionCollarPrice = convertBLEndian<std::uint32_t>(message.data() + 23);
     result.lowerAuctionCollarPrice = convertBLEndian<std::uint32_t>(message.data() + 27);
@@ -173,7 +173,7 @@ OperationalHaltMessage decodeOperationalHaltMessage(const itch::Bytes message)
     result.header.stockLocate = convertBLEndian<std::uint16_t>(message.data() + 1);
 
     // Copy stock symbol
-    std::copy_n(message.data() + 11, result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
+    std::copy_n(reinterpret_cast<const char*>(message.data() + 11), result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
     result.marketCode = static_cast<char>(message[19]);
     result.operationalHaltAction = static_cast<char>(message[20]);
 
@@ -208,7 +208,7 @@ AddOrderMPIDMessage decodeAddOrderMPIDMessage(const itch::Bytes message)
     result.price = convertBLEndian<std::uint32_t>(message.data() + 32);
 
     // Copy attribution
-    std::copy_n(message.data() + 36, result.attribution.size(), result.attribution.begin());
+    std::copy_n(reinterpret_cast<const char*>(message.data() + 36), result.attribution.size(), result.attribution.begin());
 
     return result;
 }
@@ -295,7 +295,7 @@ TradeMessage decodeTradeMessage(const itch::Bytes message)
     result.shares = convertBLEndian<std::uint32_t>(message.data() + 20);
 
     // Copy stock symbol
-    std::copy_n(message.data() + 24, result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
+    std::copy_n(reinterpret_cast<const char*>(message.data() + 24), result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
     result.price = convertBLEndian<std::uint32_t>(message.data() + 32);
     result.matchNumber = convertBLEndian<std::uint64_t>(message.data() + 36);
 
@@ -311,7 +311,7 @@ CrossTradeMessage decodeCrossTradeMessage(const itch::Bytes message)
     result.header.stockLocate = convertBLEndian<std::uint16_t>(message.data() + 1);
 
     // Copy stock symbol
-    std::copy_n(message.data() + 19, result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
+    std::copy_n(reinterpret_cast<const char*>(message.data() + 19), result.stock.symbolPadded.size(), result.stock.symbolPadded.begin());
     result.shares = convertBLEndian<std::uint64_t>(message.data() + 11);
     result.crossPrice = convertBLEndian<std::uint32_t>(message.data() + 27);
     result.matchNumber = convertBLEndian<std::uint64_t>(message.data() + 31);

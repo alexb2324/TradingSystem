@@ -101,7 +101,7 @@ public:
 
 private:
     int socketfd_ {};
-    std::array<uint8_t, network::configs::kPacketBufferSize> packetBuffer_ {};
+    std::array<std::byte, network::configs::kPacketBufferSize> packetBuffer_ {};
     sockaddr_in receiverAddr_ {};
     int receiverBufferSize_ { 8 * 1024 * 1024 }; // Request 8 MB buffer to handle traffic
     timeval receiverTimeoutConfig_ = { 5, 0 }; // 5 seconds timeout

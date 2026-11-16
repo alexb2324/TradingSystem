@@ -5,7 +5,6 @@
 #include <chrono>
 #include <thread>
 
-
 static constexpr std::size_t kRuns { 1'000'000 };
 
 using Clock = std::chrono::steady_clock;
