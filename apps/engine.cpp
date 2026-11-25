@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <print>
 #include <stdexcept>
+#include <cstring>
 #include <string>
 #include <string_view>
 #include <thread>
@@ -19,8 +20,8 @@
 #include "../third_party/rigtorp/Seqlock.h"
 
 #include "configs/ItchConfigs.h"
-
 #include "../benchmarks/BenchmarkUtil.h"
+
 
 using Clock = std::chrono::steady_clock;
 
@@ -113,7 +114,7 @@ static std::size_t processFile(Engine& engine, itch::Bytes fileData)
 }
 
 // Benchmark mode: file -> BookEngine as fast as possible, no network
-static void runTest(const std::filesystem::path& filePath, int engineCoreOpt, bool mapPopulateOpt, bool measureLatencyOpt)
+static void runTest(const std::filesystem::path& filePath, int engineCoreOpt, bool measureLatencyOpt)
 {
     if (!std::filesystem::exists(filePath))
     {
@@ -121,9 +122,9 @@ static void runTest(const std::filesystem::path& filePath, int engineCoreOpt, bo
     }
 
     // Ensure sufficient RAM before trying to fault in all pages
-    if (mapPopulateOpt) { std::println("Pre-faulting all file pages..."); }
+    std::println("Pre-faulting all file pages...");
 
-    FileSource fileSource {filePath, mapPopulateOpt};
+    FileSource fileSource {filePath, true};
     const auto fileData = fileSource.bytes();
     if (fileData.empty()) { throw std::runtime_error("File is empty: " + filePath.string()); }
 
@@ -144,7 +145,6 @@ static void runTest(const std::filesystem::path& filePath, int engineCoreOpt, bo
         engine.timing().printOverall(nsPerCycle);
 
         printTestRunStats(engine, elapsedTime, fileData, readBytes);
-
     }
     else
     {
@@ -163,28 +163,55 @@ int main(int argc, char* argv[])
 {
     const std::string_view mode = argv[1];
 
-    if (mode == "LIVE")
+    try
     {
-        std::string host = argv[3];
-        std::uint16_t port = std::stoi(argv[4]);
-        std::string symbol = argv[5];
-        int engineCore = std::stoi(argv[6]);
-        int rendererCore = std::stoi(argv[7]);
-        runProd(host, port, symbol, engineCore, rendererCore);
+        if (mode == "LIVE")
+        {
+            const std::string host = argv[3];
+            const std::uint16_t port = std::stoi(argv[4]);
+            const std::string symbol = argv[5];
+            const int engineCore = std::stoi(argv[6]);
+            const int rendererCore = std::stoi(argv[7]);
+            runProd(host, port, symbol, engineCore, rendererCore);
+        }
+        else if (mode == "TEST")
+        {
+            const std::filesystem::path file = argv[2];
+            const int engineCore = std::stoi(argv[3]);
+            const bool measureLatencyFlag = std::strcmp(argv[4], "--latency") ? true : false;
+            runTest(file, engineCore, measureLatencyFlag);
+        }
+        else
+        {
+            std::println(stderr, "Invalid mode '{}'. Use PROD or TEST.", mode);
+            return 1;
+        }
     }
-    else if (mode == "TEST")
+    catch(const std::exception& e)
     {
-        std::filesystem::path file = argv[2];
-        int engineCore = std::stoi(argv[3]);
-        bool measureLatencyFlag = false;
-        bool mapPopulateFlag = true;
-        runTest(file, engineCore, mapPopulateFlag, measureLatencyFlag);
-    }
-    else
-    {
-        std::println(stderr, "Invalid mode '{}'. Use PROD or TEST.", mode);
+        std::println(stderr, "Fatal error: {}", e.what());
         return 1;
     }
 
     return 0;
 }
+
+/*
+"Usage:"
+"  {0} TEST <itch-file> <engineCore> [--latency]"
+"  {0} LIVE <host> <port> <symbol> <engineCore> <rendererCore>"
+
+Mandatory:
+    <symbol>           Symbol to monitor/render                (example: AAPL)
+    <host>             Feed address (live)                     (example: 127.0.0.1)
+    <port>             Feed port (live)                        (example: 6969)
+    <engine-core>      Core for the engine/feed thread         (example: 1)
+    <renderer-core>    Core for the console renderer thread    (example: 2)
+Test Option:
+    --latency          Per-message latency histograms results
+
+Examples/Presets:
+    {0} TEST data/01302019.NASDAQ_ITCH50 1
+    {0} TEST data/01302019.NASDAQ_ITCH50 1 --latency
+    {0} LIVE 127.0.0.1 6969 AAPL 1 2
+*/
