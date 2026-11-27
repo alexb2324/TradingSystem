@@ -43,14 +43,14 @@ static void printTestRunStats(Engine& engine, std::chrono::duration<double> elap
     const double seconds = elapsedTime.count();
 
     std::println();
-    std::println("------------------------- Results -------------------------");
+    std::println("------------------------- Results -------------------------------------------");
     std::println("Processed messages : {}", formatNumberWithCommas(messages));
     std::println("Processed bytes    : {} / {}{}", formatNumberWithCommas(readBytes), formatNumberWithCommas(fileData.size()),
                  readBytes == fileData.size() ? "" : "  (WARNING: stopped early, truncated/corrupt tail)");
     std::println("Processing time    : {:.3f} s", seconds);
     std::println("Throughput         : {:.2f} M msgs/s, {:.1f} MB/s",
                  messages / seconds / 1e6, readBytes / seconds / 1e6);
-    std::println("Avg per message    : {:.1f} ns", seconds * 1e9 / static_cast<double>(messages));
+    std::println("Avg latency per message    : {:.1f} ns", seconds * 1e9 / static_cast<double>(messages));
 }
 
 // Pin a thread to a core. Returns the pthread error code (0 = success).
@@ -167,18 +167,19 @@ int main(int argc, char* argv[])
     {
         if (mode == "LIVE")
         {
-            const std::string host = argv[3];
-            const std::uint16_t port = std::stoi(argv[4]);
-            const std::string symbol = argv[5];
-            const int engineCore = std::stoi(argv[6]);
-            const int rendererCore = std::stoi(argv[7]);
+            const std::string host = argv[2];
+            const std::uint16_t port = std::stoi(argv[3]);
+            const std::string symbol = argv[4];
+            const int engineCore = std::stoi(argv[5]);
+            const int rendererCore = std::stoi(argv[6]);
             runProd(host, port, symbol, engineCore, rendererCore);
         }
         else if (mode == "TEST")
         {
+            bool measureLatencyFlag = false;
             const std::filesystem::path file = argv[2];
             const int engineCore = std::stoi(argv[3]);
-            const bool measureLatencyFlag = std::strcmp(argv[4], "--latency") ? true : false;
+            if (argc == 5) { measureLatencyFlag = std::strcmp(argv[4], "--latency") ? true : false; }
             runTest(file, engineCore, measureLatencyFlag);
         }
         else
@@ -211,7 +212,7 @@ Test Option:
     --latency          Per-message latency histograms results
 
 Examples/Presets:
-    {0} TEST data/01302019.NASDAQ_ITCH50 1
-    {0} TEST data/01302019.NASDAQ_ITCH50 1 --latency
+    {0} TEST 01302019.NASDAQ_ITCH50 1
+    {0} TEST 01302019.NASDAQ_ITCH50 1 --latency
     {0} LIVE 127.0.0.1 6969 AAPL 1 2
 */

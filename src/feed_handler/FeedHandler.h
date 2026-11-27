@@ -39,10 +39,10 @@ public:
             {
                 running_ = false;
             }
-            engine_.tryPublishSnapshot();
+            //engine_.tryPublishSnapshot();
         }
 
-        engine_.tryPublishSnapshot(true);
+        //engine_.tryPublishSnapshot(true);
         printSummary();
     }
 
@@ -68,9 +68,8 @@ public:
         while (readOffset + itch::configs::kItchMessageOffset <= decodedPacket->bytes.size())
         {
             const auto msgLength = convertBLEndian<itch::MessageLength>(decodedPacket->bytes.data() + readOffset);
-
-            if (readOffset + itch::configs::kItchMessageOffset + msgLength > decodedPacket->bytes.size()) { break; }
             if (msgLength == 0) { break; }
+            if (readOffset + itch::configs::kItchMessageOffset + msgLength > decodedPacket->bytes.size()) { break; }
 
             // Dispatch to engine for decoding, processing, publishing
             engine_.onMessage(decodedPacket->bytes.subspan(readOffset + itch::configs::kItchMessageOffset, msgLength));

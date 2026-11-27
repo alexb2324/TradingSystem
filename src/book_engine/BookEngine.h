@@ -50,8 +50,8 @@ namespace prod
     private:
         std::unique_ptr<MarketState> marketState_;
         std::string symbol_;
-        std::optional<itch::StockLocate> stockLocate_;
         rigtorp::Seqlock<ConsoleSnapshotMessage>& seqlock_;
+        std::optional<itch::StockLocate> stockLocate_ {};
         ConsoleSnapshotMessage currentSnapshot_ {};
         Clock::time_point startTime_ {};
         Clock::time_point lastPublishTime_ {};

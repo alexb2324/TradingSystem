@@ -5,6 +5,8 @@
 #include "configs/ItchConfigs.h"
 #include "../market_state/MarketState.h"
 
+#include <print>
+
 inline void dispatch(itch::Bytes message, MarketState& marketStateHandler)
 {
 	if (!itch::configs::kItchMessageLengthsMap.contains(static_cast<char>(message[0])))

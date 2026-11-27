@@ -76,7 +76,7 @@ private:
         storeBigEndian<std::uint16_t>(packetBuffer_.data() + 18, messageCount);
     }
 
-    std::array<uint8_t, network::configs::kPacketBufferSize> packetBuffer_ {};
+    std::array<std::byte, network::configs::kPacketBufferSize> packetBuffer_ {};
     std::size_t currentOffset_ { moldudp64::constants::kPacketHeaderLength };
     std::uint64_t packetSequenceNumber_ { 1 };
     std::uint16_t messageCount_ {};

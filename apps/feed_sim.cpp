@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
 
 	if (!std::filesystem::exists(filePath) || !std::filesystem::is_regular_file(filePath))
 	{
-		std::print(stderr, "Error: Path does not exist or is not a directory.");
+		std::println(stderr, "Error: Path does not exist or is not a directory.");
 		return 1;
 	}
 
@@ -39,3 +39,19 @@ int main(int argc, char* argv[])
 	FeedSimulator simulation {filePath, host, port, playbackSpeed, *startTime};
 	simulation.run();
 }
+
+/*
+"Usage:"
+"  {0} <itch-file> <host> <port> <speed> [start HH:MM]"
+
+Mandatory:
+	<itch-file>        Symbol to monitor/render                (example: AAPL)
+	<host>             Feed address (live)                     (example: 127.0.0.1)
+	<port>             Feed port (live)                        (example: 6969)
+	<speed>			   Core for the engine/feed thread         (example: 1)
+Optional:
+	[start HH:MM]      Core for the console renderer thread    (example: 2)
+
+Examples/Presets:
+	{0} 01302019.NASDAQ_ITCH50 127.0.0.1 6969 1 10:00"
+*/
